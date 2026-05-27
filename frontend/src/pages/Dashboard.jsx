@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getRooms, createShift, registerPayment, markCleaned, extendShift, getTodayMetrics } from '../services/api';
 import io from 'socket.io-client';
 import './Dashboard.css';
-import '../components/Navbar';
+import Navbar from '../components/Navbar';
 
 const socket = io('http://localhost:3000');
 
@@ -16,39 +16,39 @@ function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState('rooms');
   const { user, logout } = useAuth();
-  
+
 
   useEffect(() => {
     loadRooms();
     loadMetrics();
-    
+
     // Reloj en tiempo real
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    
+
     socket.emit('join_reception');
-    
+
     socket.on('shift_created', () => {
       loadRooms();
       loadMetrics();
       addNotification('✅ Nuevo turno iniciado', 'success');
     });
-    
+
     socket.on('shift_extended', () => {
       loadRooms();
       addNotification('⏰ Tiempo extendido', 'success');
     });
-    
+
     socket.on('room_needs_cleaning', () => {
       loadRooms();
       addNotification('🧹 Habitación necesita limpieza', 'warning');
     });
-    
+
     socket.on('room_cleaned', () => {
       loadRooms();
       loadMetrics();
       addNotification('✨ Habitación limpia y disponible', 'success');
     });
-    
+
     return () => {
       clearInterval(timer);
       socket.off('shift_created');
@@ -101,12 +101,12 @@ function Dashboard() {
   const handleCheckout = async (room) => {
     const method = prompt('Método de pago:\n1. Efectivo\n2. Tarjeta\n3. Transferencia');
     let payment_method = '';
-    
+
     if (method === '1') payment_method = 'cash';
     else if (method === '2') payment_method = 'card';
     else if (method === '3') payment_method = 'transfer';
     else return;
-    
+
     try {
       await registerPayment(room.shift_id, payment_method);
       loadRooms();
@@ -140,13 +140,13 @@ function Dashboard() {
     const end = new Date(endTime);
     const now = new Date();
     const diff = end - now;
-    
+
     if (diff <= 0) return { hours: 0, minutes: 0, seconds: 0, expired: true };
-    
+
     const hours = Math.floor(diff / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
-    
+
     return { hours, minutes, seconds, expired: false };
   };
 
@@ -162,46 +162,14 @@ function Dashboard() {
 
   return (
     <div className="intimax-dashboard">
-      {/* HEADER / NAVBAR - Estilo moderno */}
-      <header className="dashboard-header">
-        <div className="header-left">
-          <div className="logo">
-            <span className="logo-icon">🏨</span>
-            <span className="logo-text">INTIMAX</span>
-            <span className="logo-sub">SYSTEM</span>
-          </div>
-          <nav className="main-nav">
-            <button 
-              className={`nav-btn ${currentPage === 'rooms' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('rooms')}
-            >
-              🏠 ROOMS
-            </button>
-            <button 
-              className={`nav-btn ${currentPage === 'contact' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('contact')}
-            >
-              📞 CONTACT
-            </button>
-          </nav>
-        </div>
-        
-        <div className="header-right">
-          <div className="time-display">
-            <span className="time-icon">⏰</span>
-            <span className="time-text">
-              {currentTime.toLocaleTimeString('es-ES', { hour12: false })}
-            </span>
-          </div>
-          <div className="user-info">
-            <span className="user-name">{user?.full_name || user?.username}</span>
-            <span className="user-role">{user?.role === 'admin' ? 'ADMIN' : 'RECEPCION'}</span>
-          </div>
-          <button onClick={logout} className="logout-btn">
-            🚪 SALIR
-          </button>
-        </div>
-      </header>
+
+      <Navbar
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        currentTime={currentTime}
+        logout={logout}
+      />
+
 
       {/* CONTENIDO PRINCIPAL */}
       <main className="dashboard-main">
@@ -232,23 +200,23 @@ function Dashboard() {
               <h2>ROOMS</h2>
               <button onClick={loadRooms} className="refresh-btn">🔄 ACTUALIZAR</button>
             </div>
-            
+
             <div className="rooms-grid">
               {rooms.map(room => {
                 const timeLeft = formatTimeLeft(room.end_time);
                 const isOccupied = room.status === 'occupied';
                 const isCleaning = room.status === 'cleaning';
-                
+
                 return (
                   <div key={room.id} className={`room-card ${room.status}`}>
                     <div className="room-number">{room.room_number}</div>
                     <div className="room-type">{room.room_type?.toUpperCase()}</div>
-                    
+
                     {isOccupied && timeLeft && !timeLeft.expired && (
                       <>
                         <div className="room-timer">{formatTimer(timeLeft)}</div>
                         <div className="room-actions">
-                          <button 
+                          <button
                             className="btn-extend"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -257,7 +225,7 @@ function Dashboard() {
                           >
                             EXTENDIDO
                           </button>
-                          <button 
+                          <button
                             className="btn-free"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -269,11 +237,11 @@ function Dashboard() {
                         </div>
                       </>
                     )}
-                    
+
                     {isOccupied && timeLeft?.expired && (
                       <div className="room-expired">
                         <span>⏰ TIEMPO EXPIRO</span>
-                        <button 
+                        <button
                           className="btn-clean"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -284,11 +252,11 @@ function Dashboard() {
                         </button>
                       </div>
                     )}
-                    
+
                     {isCleaning && (
                       <div className="room-cleaning">
                         <span>🧹 LIMPIEZA</span>
-                        <button 
+                        <button
                           className="btn-clean"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -299,11 +267,11 @@ function Dashboard() {
                         </button>
                       </div>
                     )}
-                    
+
                     {room.status === 'available' && (
                       <div className="room-available">
                         <span>✅ DISPONIBLE</span>
-                        <button 
+                        <button
                           className="btn-start"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -346,23 +314,23 @@ function Dashboard() {
             <h2>HABITACIÓN {selectedRoom.room_number}</h2>
             <p>Tipo: {selectedRoom.room_type}</p>
             <p>Precio base: ${selectedRoom.base_price?.toLocaleString()}</p>
-            
+
             <div className="duration-selector">
               <label>DURACIÓN:</label>
               <div className="duration-buttons">
-                <button 
+                <button
                   className={`duration-btn ${duration === 2 ? 'active' : ''}`}
                   onClick={() => setDuration(2)}
                 >
                   2 HS
                 </button>
-                <button 
+                <button
                   className={`duration-btn ${duration === 4 ? 'active' : ''}`}
                   onClick={() => setDuration(4)}
                 >
                   4 HS
                 </button>
-                <button 
+                <button
                   className={`duration-btn ${duration === 6 ? 'active' : ''}`}
                   onClick={() => setDuration(6)}
                 >
@@ -370,7 +338,7 @@ function Dashboard() {
                 </button>
               </div>
             </div>
-            
+
             <div className="modal-actions">
               <button onClick={handleStartShift} className="btn-confirm">
                 INICIAR TURNO

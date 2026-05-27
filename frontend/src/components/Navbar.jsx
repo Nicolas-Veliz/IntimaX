@@ -1,4 +1,4 @@
-import React from 'react';
+{/*import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Avatar from './Avatar';
 
@@ -71,4 +71,116 @@ function Navbar({ currentPage, setCurrentPage }) {
   );
 }
 
+export default Navbar;*/}
+
+import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import './Navbar.css';
+
+function Navbar({ currentPage, setCurrentPage, currentTime, logout }) {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
+  // Obtener turno en texto
+  const getShiftText = () => {
+    const shifts = {
+      mañana: '🌅 Mañana',
+      tarde: '☀️ Tarde',
+      noche: '🌙 Noche'
+    };
+
+    return shifts[user?.shift] || '';
+  };
+
+  return (
+    <header className="dashboard-header">
+      {/* IZQUIERDA */}
+      <div className="header-left">
+        {/* LOGO */}
+        <div className="logo">
+          <span className="logo-icon">🏨</span>
+          <span className="logo-text">INTIMAX</span>
+          <span className="logo-sub">SYSTEM</span>
+        </div>
+
+        {/* MENÚ */}
+        <nav className="main-nav">
+          <button
+            className={`nav-btn ${currentPage === 'rooms' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('rooms')}
+          >
+            🏠 ROOMS
+          </button>
+
+          <button
+            className={`nav-btn ${currentPage === 'contact' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('contact')}
+          >
+            📞 CONTACT
+          </button>
+
+          <button
+            className={`nav-btn ${currentPage === 'about' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('about')}
+          >
+            ℹ️ ABOUT
+          </button>
+
+          {isAdmin && (
+            <>
+              <button
+                className={`nav-btn ${currentPage === 'users' ? 'active' : ''}`}
+                onClick={() => setCurrentPage('users')}
+              >
+                👥 USERS
+              </button>
+
+              <button
+                className={`nav-btn ${currentPage === 'reports' ? 'active' : ''}`}
+                onClick={() => setCurrentPage('reports')}
+              >
+                📊 REPORTS
+              </button>
+            </>
+          )}
+        </nav>
+      </div>
+
+      {/* DERECHA */}
+      <div className="header-right">
+
+        {/* RELOJ */}
+        <div className="time-display">
+          <span className="time-icon">⏰</span>
+
+          <span className="time-text">
+            {currentTime?.toLocaleTimeString('es-ES', {
+              hour12: false
+            })}
+          </span>
+        </div>
+
+        {/* INFO USUARIO */}
+        <div className="user-info">
+          <span className="user-name">
+            {user?.full_name ||
+              `${user?.first_name || ''} ${user?.last_name || ''}`}
+          </span>
+
+          <span className="user-role">
+            {isAdmin ? 'ADMIN' : getShiftText()}
+          </span>
+        </div>
+
+        {/* BOTÓN SALIR */}
+        <button onClick={logout} className="logout-btn">
+          🚪 SALIR
+        </button>
+      </div>
+    </header>
+  );
+}
+
 export default Navbar;
+
+

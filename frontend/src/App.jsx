@@ -87,7 +87,6 @@ import Footer from './components/Footer';
 function ProtectedLayout() {
   return (
     <>
-      <Navbar />
       <main>
         <Outlet /> 
       </main>

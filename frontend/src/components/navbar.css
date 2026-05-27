@@ -1,0 +1,145 @@
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: #111827;
+  padding: 14px 24px;
+  border-bottom: 2px solid #1f2937;
+
+  color: white;
+}
+
+/* IZQUIERDA */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+
+  flex: 1;
+}
+
+/* LOGO */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  font-size: 24px;
+}
+
+.logo-text {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.logo-sub {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* NAV */
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: #d1d5db;
+
+  padding: 10px 14px;
+  border-radius: 8px;
+
+  cursor: pointer;
+  transition: 0.2s;
+
+  font-weight: 600;
+}
+
+.nav-btn:hover {
+  background: #1f2937;
+  color: white;
+}
+
+.nav-btn.active {
+  background: #2563eb;
+  color: white;
+}
+
+/* DERECHA */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  flex-shrink: 0;
+}
+
+/* RELOJ */
+.time-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: #1f2937;
+  padding: 8px 12px;
+  border-radius: 8px;
+
+  min-width: 120px;
+}
+
+.time-icon {
+  font-size: 18px;
+}
+
+.time-text {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+/* USER */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* BOTÓN SALIR */
+.logout-btn {
+  background: #dc2626;
+  color: white;
+
+  border: none;
+  padding: 10px 14px;
+
+  border-radius: 8px;
+  cursor: pointer;
+
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.logout-btn:hover {
+  background: #b91c1c;
+}
