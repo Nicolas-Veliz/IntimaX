@@ -13,3 +13,26 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* --- CONFIGURACIÓN DE LOGOS CORPORATIVOS --- */
+
+.logo {
+  display: flex;
+  align-items: center;  /* Centra el símbolo y el texto verticalmente entre sí */
+  gap: 12px;            /* Deja un espacio de separación prolijo entre las dos imágenes */
+  padding-right: 15px;  /* Separa el logo final del primer botón (ROOMS) */
+}
+
+/* Tamaño para el corazón con la puerta */
+.logo-symbol {
+  height: 42px;         /* Altura justa para que resalte sin agrandar el Navbar */
+  width: auto;          /* Mantiene la proporción original para que no se estire */
+  object-fit: contain;
+}
+
+/* Tamaño para las letras (INTIMAX SYSTEM) */
+.logo-text-img {
+  height: 28px;         /* Un poquito más bajo que el símbolo para dar armonía visual */
+  width: auto;          /* Mantiene la proporción original para que no se deforme */
+  object-fit: contain;
+}

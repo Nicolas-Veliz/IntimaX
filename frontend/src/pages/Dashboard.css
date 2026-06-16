@@ -1,4 +1,4 @@
-/* INTIMAX DASHBOARD - ESTILO PROFESIONAL */
+/* INTIMAX DASHBOARD - ESTILO PREMIUM INTEGRADO */
 * {
   margin: 0;
   padding: 0;
@@ -7,137 +7,15 @@
 
 .intimax-dashboard {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: #070708;
+  /* Negro noche absoluto de fondo para todo el sistema */
+  font-family: 'Montserrat', sans-serif;
 }
 
-/* ========== HEADER / NAVBAR ========== */
-.dashboard-header {
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-}
-
-.logo {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-}
-
-.logo-icon {
-  font-size: 28px;
-}
-
-.logo-text {
-  font-size: 24px;
-  font-weight: bold;
-  color: #fff;
-  letter-spacing: 2px;
-}
-
-.logo-sub {
-  font-size: 12px;
-  color: #e94560;
-  letter-spacing: 3px;
-}
-
-.main-nav {
-  display: flex;
-  gap: 10px;
-}
-
-.nav-btn {
-  background: transparent;
-  border: none;
-  color: #aaa;
-  font-size: 14px;
-  font-weight: bold;
-  padding: 10px 20px;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: all 0.3s;
-  letter-spacing: 1px;
-}
-
-.nav-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.nav-btn.active {
-  color: #e94560;
-  background: rgba(233, 69, 96, 0.1);
-  border-bottom: 2px solid #e94560;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.time-display {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 8px 15px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.time-icon {
-  font-size: 14px;
-}
-
-.time-text {
-  font-family: monospace;
-  font-size: 18px;
-  font-weight: bold;
-  color: #00ff88;
-}
-
-.user-info {
-  text-align: right;
-}
-
-.user-name {
-  display: block;
-  font-size: 14px;
-  font-weight: bold;
-  color: #fff;
-}
-
-.user-role {
-  font-size: 11px;
-  color: #e94560;
-}
-
-.logout-btn {
-  background: rgba(233, 69, 96, 0.2);
-  border: 1px solid #e94560;
-  color: #e94560;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s;
-}
-
-.logout-btn:hover {
-  background: #e94560;
-  color: #fff;
+/* ========== CONTENEDOR PRINCIPAL ========== */
+.dashboard-main {
+  padding: 20px 0;
+  width: 100%;
 }
 
 /* ========== STATS BAR ========== */
@@ -145,40 +23,48 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  padding: 20px 30px;
-  background: rgba(0, 0, 0, 0.3);
-  margin-bottom: 20px;
+  padding: 24px 30px;
+  background: rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(232, 186, 111, 0.1);
+  margin-bottom: 30px;
 }
 
 .stat-item {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 15px;
+  background: #111112;
+  padding: 20px;
   border-radius: 10px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(232, 186, 111, 0.15);
+  /* Finos trazos dorados */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .stat-label {
   display: block;
-  font-size: 12px;
-  color: #aaa;
-  letter-spacing: 1px;
-  margin-bottom: 5px;
+  font-size: 11px;
+  color: #C8A46A;
+  /* Dorado pasivo */
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
 .stat-value {
   display: block;
   font-size: 28px;
-  font-weight: bold;
-  color: #fff;
+  font-weight: 700;
+  color: #ffffff;
 }
 
+/* Colores de estados en las estadísticas */
 .stat-value.occupied {
-  color: #e94560;
+  color: #B11226;
+  /* Rojo Intimax corporativo */
 }
 
 .stat-value.available {
   color: #00ff88;
+  /* Verde brillante nativo */
 }
 
 /* ========== ROOMS HEADER ========== */
@@ -187,59 +73,101 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 30px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  width: 100%;
+  /* Asegura que ocupe todo el ancho disponible */
 }
 
-.rooms-header h2 {
-  color: #fff;
-  font-size: 24px;
-  letter-spacing: 3px;
-  font-weight: bold;
+/* Contenedor que agrupa los botones a la par */
+.header-actions-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
-.refresh-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 5px;
+/* Botón Administrar (Look Negro Inicial) */
+.manage-rooms-btn {
+  background: transparent;
+  border: 1px solid #E8BA6F;
+  color: #E8BA6F;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 10px 20px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Al seleccionarlo o pasar el mouse: Se invierte a Dorado con letras negras */
+.manage-rooms-btn:hover {
+  background: #E8BA6F;
+  color: #000000;
+  box-shadow: 0 0 14px rgba(232, 186, 111, 0.35);
+}
+
+/* Botón Actualizar (Sincronizado en tamaño) */
+.refresh-btn {
+  background: transparent;
+  border: 1px solid #E8BA6F;
+  color: #E8BA6F;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .refresh-btn:hover {
-  background: #e94560;
+  background: #E8BA6F;
+  color: #000000;
+  box-shadow: 0 0 12px rgba(232, 186, 111, 0.3);
 }
 
-/* ========== GRID DE HABITACIONES ========== */
+/* ========== GRID DE HABITACIONES (REPARADO) ========== */
 .rooms-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
-  padding: 0 30px 30px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 25px !important;
+  padding: 0 30px 40px !important;
+  width: 100%;
 }
 
 .room-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(5px);
-  border-radius: 15px;
+  background: #111112;
+  border-radius: 12px;
   padding: 25px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .room-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+  border-color: #E8BA6F;
+  box-shadow: 0 12px 30px rgba(232, 186, 111, 0.08);
 }
 
+/* Bordes izquierdos indicadores de estado */
 .room-card.available {
   border-left: 4px solid #00ff88;
 }
 
 .room-card.occupied {
-  border-left: 4px solid #e94560;
+  border-left: 4px solid #B11226;
 }
 
 .room-card.cleaning {
@@ -247,69 +175,109 @@
 }
 
 .room-number {
-  font-size: 42px;
-  font-weight: bold;
-  color: #fff;
-  letter-spacing: 2px;
+  font-size: 44px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1px;
 }
 
 .room-type {
-  font-size: 12px;
-  color: #aaa;
-  margin-bottom: 15px;
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-bottom: 20px;
   letter-spacing: 2px;
+  font-weight: 600;
 }
 
 .room-timer {
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 700;
   font-family: monospace;
   color: #00ff88;
   margin: 15px 0;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 10px;
+  background: #000000;
+  padding: 12px;
   border-radius: 8px;
+  border: 1px solid rgba(0, 255, 136, 0.15);
+}
+
+/* --- BADGES E ICONOS DE ESTADO INTERNOS --- */
+.room-status-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+}
+
+.status-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Forzar los colores de las tipografías al lado del icono */
+.room-status-badge.text-available span {
+  color: #00ff88 !important;
+  font-weight: 700;
+}
+
+.room-status-badge.text-cleaning span {
+  color: #ffc107 !important;
+  font-weight: 700;
+}
+
+.room-status-badge.text-occupied span,
+.room-status-badge.text-expired span {
+  color: #B11226 !important;
+  font-weight: 700;
 }
 
 .room-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 15px;
+  gap: 12px;
+  margin-top: 18px;
 }
 
-.btn-extend, .btn-free, .btn-start, .btn-clean {
+/* Botoneras dentro de las tarjetas */
+.btn-extend,
+.btn-free,
+.btn-start,
+.btn-clean {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   border: none;
-  border-radius: 5px;
-  font-weight: bold;
+  border-radius: 6px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
   font-size: 12px;
+  letter-spacing: 0.5px;
 }
 
 .btn-extend {
   background: #ffc107;
-  color: #000;
+  color: #000000;
 }
 
 .btn-extend:hover {
-  background: #ffab00;
-  transform: scale(1.02);
+  background: #e0a800;
 }
 
 .btn-free {
-  background: #e94560;
-  color: #fff;
+  background: #B11226;
+  color: #ffffff;
 }
 
 .btn-free:hover {
-  background: #c7354f;
+  background: #8f0e1e;
 }
 
 .btn-start {
   background: #00ff88;
-  color: #000;
+  color: #000000;
 }
 
 .btn-start:hover {
@@ -318,32 +286,24 @@
 
 .btn-clean {
   background: #17a2b8;
-  color: #fff;
+  color: #ffffff;
 }
 
-.room-available, .room-cleaning, .room-expired {
-  margin-top: 15px;
+.room-available,
+.room-cleaning,
+.room-expired {
+  margin-top: 5px;
 }
 
-.room-available span, .room-cleaning span, .room-expired span {
-  display: block;
-  font-size: 12px;
-  margin-bottom: 10px;
-  color: #aaa;
-}
-
-.room-expired span {
-  color: #e94560;
-}
-
-/* ========== MODAL ========== */
+/* ========== MODAL PREMIUM (INTIMAX SYSTEM) ========== */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -351,32 +311,41 @@
 }
 
 .modal-content {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 20px;
-  padding: 40px;
-  min-width: 350px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #111112;
+  border-radius: 12px;
+  padding: 35px 40px;
+  min-width: 420px;
+  border: 1px solid #E8BA6F;
+  box-shadow: 0px 10px 30px rgba(232, 186, 111, 0.12);
 }
 
 .modal-content h2 {
-  color: #fff;
+  color: #E8BA6F;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .modal-content p {
-  color: #aaa;
-  margin: 10px 0;
+  color: #E5E7EB;
+  margin: 12px 0;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .duration-selector {
-  margin: 20px 0;
+  margin: 25px 0;
 }
 
 .duration-selector label {
-  color: #fff;
+  color: #C8A46A;
+  font-weight: 700;
   display: block;
-  margin-bottom: 10px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
 }
 
 .duration-buttons {
@@ -387,106 +356,66 @@
 .duration-btn {
   flex: 1;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-radius: 8px;
+  background: #1F2937;
+  border: 1px solid #374151;
+  color: #9CA3AF;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s;
-  font-weight: bold;
-}
-
-.duration-btn.active {
-  background: #e94560;
-  border-color: #e94560;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.2s ease;
+  font-weight: 700;
+  font-size: 13px;
 }
 
 .duration-btn:hover {
-  background: rgba(233, 69, 96, 0.5);
+  background: #374151;
+  color: #ffffff;
+}
+
+.duration-btn.active {
+  background: #000000;
+  border-color: #E8BA6F;
+  color: #E8BA6F;
 }
 
 .modal-actions {
   display: flex;
   gap: 15px;
-  margin-top: 25px;
+  margin-top: 30px;
 }
 
-.btn-confirm, .btn-cancel {
+.btn-confirm,
+.btn-cancel {
   flex: 1;
-  padding: 12px;
+  padding: 14px;
   border: none;
   border-radius: 8px;
-  font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
+  text-transform: uppercase;
 }
 
 .btn-confirm {
-  background: #00ff88;
-  color: #000;
+  background: #B11226;
+  color: #ffffff;
+}
+
+.btn-confirm:hover {
+  background: #8f0e1e;
 }
 
 .btn-cancel {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: transparent;
+  border: 1px solid #4B5563;
+  color: #9CA3AF;
+  transition: all 0.2s ease;
 }
 
-/* ========== CONTACT PAGE ========== */
-.contact-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 70vh;
-  padding: 30px;
-}
-
-.contact-card {
+.btn-cancel:hover {
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 50px;
-  text-align: center;
-  max-width: 500px;
-  width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.contact-card h2 {
-  color: #fff;
-  margin-bottom: 30px;
-  letter-spacing: 3px;
-}
-
-.social-links {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-
-.social-link {
-  color: #aaa;
-  text-decoration: none;
-  font-size: 18px;
-  transition: all 0.3s;
-  padding: 10px 20px;
-  border-radius: 25px;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.social-link:hover {
-  color: #e94560;
-  background: rgba(233, 69, 96, 0.1);
-}
-
-.about-section h3 {
-  color: #fff;
-  margin-bottom: 15px;
-}
-
-.about-section p {
-  color: #aaa;
-  line-height: 1.6;
+  color: #ffffff;
 }
 
 /* ========== NOTIFICACIONES ========== */
@@ -498,26 +427,25 @@
 }
 
 .notification {
-  padding: 12px 20px;
+  padding: 14px 24px;
   margin-top: 10px;
   border-radius: 8px;
-  color: #fff;
-  font-weight: bold;
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   animation: slideIn 0.3s ease;
 }
 
 .notification.success {
   background: #00ff88;
-  color: #000;
+  color: #000000;
 }
 
 .notification.warning {
   background: #ffc107;
-  color: #000;
-}
-
-.notification.info {
-  background: #17a2b8;
+  color: #000000;
 }
 
 @keyframes slideIn {
@@ -525,6 +453,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -533,30 +462,530 @@
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
-  .dashboard-header {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .header-left {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
   .stats-bar {
     grid-template-columns: repeat(2, 1fr);
     padding: 15px;
   }
-  
+
   .rooms-grid {
     grid-template-columns: 1fr;
     padding: 15px;
   }
-  
+
   .rooms-header {
     flex-direction: column;
     gap: 15px;
     padding: 15px;
   }
+}
+
+/* ==========================================================================
+   ESTILOS GESTIÓN ABM HABITACIONES (INTIMAX SYSTEM)
+   ========================================================================== */
+
+.manage-rooms-page {
+  padding: 0 30px 40px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.manage-rooms-container {
+  background: #111112;
+  border: 1px solid rgba(232, 186, 111, 0.2);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.manage-rooms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(232, 186, 111, 0.15);
+  padding-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+.manage-rooms-header h2 {
+  color: #E8BA6F; /* Dorado oficial */
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Distribución en dos columnas */
+.abm-layout {
+  display: flex;
+  gap: 40px;
+}
+
+.abm-form-section {
+  flex: 1;
+  background: #070708;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 25px;
+}
+
+.abm-table-section {
+  flex: 1.8;
+  background: #070708;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 25px;
+}
+
+.abm-layout h3 {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 10px;
+}
+
+/* --- ESTILOS DEL FORMULARIO --- */
+.abm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #C8A46A; /* Dorado pasivo */
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.form-group input, 
+.form-group select {
+  background: #111112;
+  border: 1px solid rgba(232, 186, 111, 0.2);
+  border-radius: 6px;
+  padding: 12px 14px;
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+  border-color: #E8BA6F; /* Resalta en dorado al clickear */
+}
+
+.form-group input::placeholder {
+  color: #4B5563;
+}
+
+/* Botonera del formulario */
+.form-actions-abm {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-confirm-abm {
+  flex: 1.5;
+  background: #B11226; /* Rojo Intimax */
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+
+.btn-confirm-abm:hover { background: #8f0e1e; }
+
+.btn-clear-abm {
+  flex: 0.7;
+  background: transparent;
+  border: 1px solid #4B5563;
+  color: #9CA3AF;
+  padding: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.btn-clear-abm:hover {
+  border-color: #9CA3AF;
+  color: #ffffff;
+}
+
+/* --- ESTILOS DE LA TABLA --- */
+.table-responsive-abm {
+  overflow-x: auto;
+}
+
+.abm-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.abm-table th {
+  color: #C8A46A;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 14px 10px;
+  border-bottom: 2px solid rgba(232, 186, 111, 0.2);
+}
+
+.abm-table td {
+  padding: 14px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.table-index { color: #4B5563; font-weight: 700; }
+.table-room-num { font-weight: 700; }
+.table-room-price { color: #00ff88; font-family: monospace; font-size: 15px; font-weight: bold; }
+
+/* Badges para el tipo de habitación en la tabla */
+.badge-type {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.badge-type.suite { color: #E8BA6F; border: 1px solid rgba(232, 186, 111, 0.3); }
+.badge-type.doble { color: #17a2b8; border: 1px solid rgba(23, 162, 184, 0.3); }
+.badge-type.simple { color: #9CA3AF; border: 1px solid rgba(156, 163, 175, 0.3); }
+
+/* Acciones en la grilla */
+.table-actions-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-table-edit, 
+.btn-table-delete {
+  background: #111112;
+  border: 1px solid #374151;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 12px;
+}
+
+.btn-table-edit:hover { border-color: #ffc107; background: rgba(255, 193, 7, 0.05); }
+.btn-table-delete:hover { border-color: #B11226; background: rgba(177, 18, 38, 0.05); }
+
+/* Responsivo para el ABM */
+@media (max-width: 1024px) {
+  .abm-layout { flex-direction: column; gap: 25px; }
+}
+
+/* ==========================================================================
+   ESTILOS GESTIÓN ABM USUARIOS / PERSONAL (MOCKUP STYLED)
+   ========================================================================== */
+
+.manage-users-page {
+  padding: 0 30px 40px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.manage-users-container {
+  background: #111112;
+  border: 1px solid rgba(232, 186, 111, 0.2);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.manage-users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(232, 186, 111, 0.15);
+  padding-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+.manage-users-header h2 {
+  color: #E8BA6F;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Botonera de acciones vertical estilo Mockup */
+.form-actions-abm-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.form-actions-abm-vertical button {
+  width: 100%;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+/* Filas de la tabla seleccionables con hover premium */
+.table-row-selectable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.table-row-selectable:hover {
+  background: rgba(232, 186, 111, 0.08) !important;
+}
+
+/* Borde dorado perimetral para la tabla estilo cuadro del mockup */
+.users-custom-table {
+  border: 1px solid #E8BA6F !important;
+  border-radius: 4px;
+}
+
+.users-custom-table th {
+  border-bottom: 1px solid #E8BA6F !important;
+  background: #070708;
+  text-align: center;
+}
+
+.users-custom-table td {
+  text-align: center;
+  border-bottom: 1px solid rgba(232, 186, 111, 0.15);
+}
+
+.table-hint-text {
+  color: #6B7280;
+  font-size: 11px;
+  margin-top: 15px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Botón Modificar exclusivo del ABM de Usuarios (Rojo Intimax) */
+.btn-modify-abm {
+  background: #B11226 !important; /* Rojo corporativo */
+  color: #ffffff !important;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-modify-abm:hover {
+  background: #8f0e1e !important; /* Tono más oscuro al pasar el mouse */
+}
+
+/* ==========================================================================
+   ESTILOS PREMIUM PESTAÑA REPORTES (MOCKUP STYLED - BORDES DORADOS)
+   ========================================================================== */
+
+.reports-page-wrapper {
+  padding: 0 30px 40px;
+  font-family: 'Montserrat', sans-serif;
+  color: #ffffff;
+}
+
+.reports-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(232, 186, 111, 0.15);
+  padding-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+.reports-page-header h2 {
+  color: #E8BA6F;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Grilla Superior de 3 Columnas */
+.reports-top-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 1.5fr;
+  gap: 25px;
+  margin-bottom: 25px;
+}
+
+/* Contenedores Base con trazo de oro estilo Mockup */
+.report-card-box, .report-card-kpi {
+  background: #111112;
+  border: 1px solid #E8BA6F; /* El dorado de siempre */
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Columna izquierda de KPIs individuales */
+.reports-kpi-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.kpi-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.kpi-value-box {
+  background: #070708;
+  border: 1px solid rgba(232, 186, 111, 0.2);
+  padding: 15px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.kpi-main-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.kpi-main-value.method-text {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Títulos internos de los cuadros grandes */
+.chart-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(232, 186, 111, 0.15);
+  padding-bottom: 8px;
+}
+
+/* GRÁFICO DE BARRAS ROJAS NATIVO (Habitaciones más usadas) */
+.chart-native-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 5px;
+}
+
+.chart-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.chart-label {
+  width: 70px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.chart-bar-wrapper {
+  flex: 1;
+  background: #070708;
+  height: 22px;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(232, 186, 111, 0.1);
+}
+
+/* La barra de porcentaje roja del mockup */
+.chart-bar-fill {
+  height: 100%;
+  background: #B11226; /* Rojo Intimax corporativo */
+  border-radius: 2px;
+  transition: width 0.5s ease-in-out;
+}
+
+/* Ajustes de tablas en reportes */
+.layout-table-reports {
+  border: none !important;
+  width: 100%;
+}
+
+.layout-table-reports th {
+  background: #070708;
+  color: #E8BA6F !important;
+  font-weight: 600;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(232, 186, 111, 0.3) !important;
+}
+
+.layout-table-reports td {
+  background: #070708 !important;
+  border-bottom: 1px solid rgba(232, 186, 111, 0.15) !important;
+  font-size: 14px;
+  color: #ffffff !important;
+}
+
+/* Indicadores de sesión (Puntito Verde y Rojo) */
+.status-badge-report {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dot-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.red-dot { background: #ff4d4d; box-shadow: 0 0 8px #ff4d4d; }
+.green-dot { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
+
+/* Cajas internas oscuras de las celdas detalladas abajo */
+.full-ledger-table td {
+  padding: 12px 8px;
+}
+
+.badge-time-report, .badge-pay-report {
+  background: #111112;
+  border: 1px solid rgba(232, 186, 111, 0.25);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* Botones especiales de estado en el tiempo */
+.badge-time-report.action-extended {
+  border-color: #E8BA6F;
+  color: #E8BA6F;
+}
+
+.badge-time-report.action-free {
+  border-color: #6B7280;
+  color: #9CA3AF;
 }

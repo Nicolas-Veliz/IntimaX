@@ -1,114 +1,73 @@
 .dashboard-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-
-  background: #111827;
-  padding: 14px 24px;
-  border-bottom: 2px solid #1f2937;
-
-  color: white;
+  background: #000000; 
+  padding: 10px 24px;
+  border-bottom: 1.5px solid #E8BA6F; 
+  height: 90px; 
+  box-sizing: border-box;
 }
 
-/* IZQUIERDA */
-.header-left {
+.nav-group-left, 
+.nav-group-right, 
+.header-right-status {
   display: flex;
   align-items: center;
-  gap: 30px;
-
-  flex: 1;
+  gap: 15px;
 }
 
-/* LOGO */
-.logo {
+.header-center-logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
 }
 
-.logo-icon {
-  font-size: 24px;
-}
-
-.logo-text {
-  font-size: 22px;
-  font-weight: bold;
-  color: #ffffff;
-}
-
-.logo-sub {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-/* NAV */
-.main-nav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  flex-wrap: wrap;
+.logo-text-img-only {
+  height: 46px; 
+  width: auto;
+  object-fit: contain;
 }
 
 .nav-btn {
   background: transparent;
   border: none;
-  color: #d1d5db;
-
-  padding: 10px 14px;
-  border-radius: 8px;
-
+  color: #C8A46A; 
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 6px 12px;
   cursor: pointer;
   transition: 0.2s;
-
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .nav-btn:hover {
-  background: #1f2937;
-  color: white;
+  color: #E8BA6F;
 }
 
 .nav-btn.active {
-  background: #2563eb;
-  color: white;
+  color: #E8BA6F;
+  border-bottom: 2px solid #E8BA6F;
 }
 
-/* DERECHA */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-
-  flex-shrink: 0;
-}
-
-/* RELOJ */
 .time-display {
+  background: #1f2937;
+  padding: 6px 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
-
-  background: #1f2937;
-  padding: 8px 12px;
-  border-radius: 8px;
-
-  min-width: 120px;
-}
-
-.time-icon {
-  font-size: 18px;
+  gap: 6px;
 }
 
 .time-text {
   color: white;
   font-size: 14px;
   font-weight: 600;
-
-  white-space: nowrap;
 }
 
-/* USER */
 .user-info {
   display: flex;
   flex-direction: column;
@@ -118,6 +77,7 @@
 .user-name {
   font-size: 14px;
   font-weight: bold;
+  color: white;
 }
 
 .user-role {
@@ -125,21 +85,92 @@
   color: #9ca3af;
 }
 
-/* BOTÓN SALIR */
 .logout-btn {
   background: #dc2626;
   color: white;
-
   border: none;
-  padding: 10px 14px;
-
+  padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-
   font-weight: bold;
-  transition: 0.2s;
 }
 
-.logout-btn:hover {
-  background: #b91c1c;
+/* ==========================================================================
+   AJUSTES EXCLUSIVOS PARA VISTA RECEPCIONISTA (NAVBAR EQUILIBRADA)
+   ========================================================================== */
+
+/* Cuando es recepcionista, controlamos que los grupos de botones no se dispersen */
+.dashboard-header.is-receptionist .nav-group-left,
+.dashboard-header.is-receptionist .nav-group-right {
+  display: flex;
+  gap: 20px; /* Un espacio elegante y cercano entre botones */
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+/* Alineamos el grupo izquierdo más hacia el centro/derecha (acercándose al logo) */
+.dashboard-header.is-receptionist .nav-group-left {
+  justify-content: flex-end;
+  padding-right: 40px; /* Separación prudente del logo */
+}
+
+/* Alineamos el grupo derecho más hacia el centro/izquierda (acercándose al logo) */
+.dashboard-header.is-receptionist .nav-group-right {
+  justify-content: flex-start;
+  padding-left: 40px; /* Separación prudente del logo */
+}
+
+/* Opcional: Un sutil efecto de transición para que los botones se acomoden premium */
+.dashboard-header.is-receptionist .nav-btn {
+  padding: 10px 18px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   AVATAR PROFILE CIRCULAR - ESTILO GOOGLE PREMIUM
+   ========================================================================== */
+
+.user-profile-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 15px;
+}
+
+/* El círculo dorado perfecto */
+.user-avatar-circle {
+  width: 42px;
+  height: 42px;
+  background-color: #E8BA6F; /* Dorado oficial Intimax */
+  color: #0d0d0e; /* Letras oscuras contrastantes */
+  border-radius: 50%; /* Lo hace un círculo perfecto */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 800; /* Iniciales bien marcadas */
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 10px rgba(232, 186, 111, 0.25); /* Sutil destello dorado */
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+/* Efecto hover interactivo estilo Google Account */
+.user-profile-wrapper:hover .user-avatar-circle {
+  transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(232, 186, 111, 0.45);
+}
+
+/* Texto del Rol que va abajo del círculo */
+.user-role-sub {
+  color: #9CA3AF;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: block;
+  text-align: center;
 }

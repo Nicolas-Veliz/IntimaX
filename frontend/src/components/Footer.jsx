@@ -1,83 +1,55 @@
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import './Footer.css';
 
 function Footer() {
-    const { user } = useAuth();
-    const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear();
 
-    // Si no es admin, no mostrar footer
-    if (user?.role !== 'admin' && user?.role !== 'supervisor') {
-        return null;
-    }
+  return (
+    <footer className="intimax-footer">
+      <div className="footer-main-content">
 
-    return (
-    <footer style={{
-            background: '#2c3e50',
-            color: '#ecf0f1',
-            padding: '30px 20px 20px',
-            marginTop: '40px',
-            fontSize: '14px'
-        }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '30px',
-                    marginBottom: '30px'
-                }}>
-
-                    {/* Info del sistema */}
-                    <div>
-                        <h4 style={{ marginBottom: '15px', color: '#3498db' }}>🏨 Telo Management System</h4>
-                        <p>Sistema profesional para gestión de albergues transitorios</p>
-                        <p>Versión 2.0.0 - Enterprise</p>
-                        <p style={{ fontSize: '12px', marginTop: '10px' }}>© {currentYear} Telo System</p>
-                    </div>
-
-                    {/* Enlaces rápidos */}
-                    <div>
-                        <h4 style={{ marginBottom: '15px', color: '#3498db' }}>Enlaces útiles</h4>
-                        <p><a href="#" style={{ color: '#ecf0f1', textDecoration: 'none' }}>📖 Manual de usuario</a></p>
-                        <p><a href="#" style={{ color: '#ecf0f1', textDecoration: 'none' }}>🐛 Reportar error</a></p>
-                        <p><a href="#" style={{ color: '#ecf0f1', textDecoration: 'none' }}>💡 Solicitar feature</a></p>
-                        <p><a href="#" style={{ color: '#ecf0f1', textDecoration: 'none' }}>🔒 Políticas de privacidad</a></p>
-                    </div>
-
-          {/* Contacto y soporte */ }
-    <div>
-        <h4 style={{ marginBottom: '15px', color: '#3498db' }}>Contacto</h4>
-        <p>📧 soporte@telosystem.com</p>
-        <p>📞 (011) 1234-5678</p>
-        <p>🕒 Soporte técnico: 24/7</p>
-        <p>💬 Respuesta garantizada en &lt; 2hs</p>
-    </div>
-
-    {/* Estadísticas rápidas */ }
-    <div>
-        <h4 style={{ marginBottom: '15px', color: '#3498db' }}>Sistema</h4>
-        <p>✅ Base de datos: MySQL</p>
-        <p>✅ Backend: Node.js + Express</p>
-        <p>✅ Frontend: React + Vite</p>
-        <p>🔒 Datos anonimizados</p>
-    </div>
-        */</div >
-        
-        <hr style={{ margin: '20px 0', borderColor: '#34495e' }} />
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '10px',
-          fontSize: '12px',
-          opacity: 0.8
-        }}>
-          <div>✨ Cumple con normativas de privacidad - Sin almacenamiento de datos personales</div>
-          <div>🛡️ Sistema seguro para entornos críticos</div>
+        {/* SECCIÓN 1: BRANDING (Estilo Mockup) */}
+        <div className="footer-section section-brand">
+          <h3 className="footer-title">INTIMAX <span className="gold-text">SYSTEM</span></h3>
+          <p className="footer-text">Control de Gestión de Albergues Transitorios, desarrollado a medida para optimizar la recepción y el control de turnos en tiempo real.</p>
         </div>
-      </div >
-    </footer >
+
+        {/* SECCIÓN 2: SOPORTE / AUTORES (Combinación) */}
+        <div className="footer-section section-support">
+          <h3 className="footer-title">CONTACT</h3>
+          <p className="footer-text">Soporte Técnico Especializado</p>
+          <p className="footer-highlight">Comunicate con cualquiera de nuestro Staff</p>
+          <p className="footer-subtext">Tucumán, Argentina</p>
+        </div>
+
+        {/* SECCIÓN 3: SOBRE NOSOTROS / HISTORIA (Estilo Mockup) */}
+        <div className="footer-section section-about">
+          <h3 className="footer-title">ABOUT US</h3>
+          <p className="footer-text">Somos un grupo de jóvenes programadores dedicados a ofrecerte las mejores soluciones web de alto impacto y rendimiento.</p>
+        </div>
+
+      </div>
+
+      {/* LÍNEA DIVISORIA INFERIOR ANTES DE LAS REDES */}
+      <div className="footer-divider"></div>
+
+      <div className="footer-bottom-bar">
+        {/* COPYRIGHT IZQUIERDO */}
+        <div className="copyright-text">
+          &copy; {currentYear} Intimax System. All Rights Reserved. <span className="version-tag">v1.2.0 - Premium</span>
+        </div>
+
+        {/* SOCIAL MEDIA DERECHO: Minimalista con 2 Redes */}
+        <div className="footer-social">
+          <a href="#" className="social-icon-link" title="Instagram">
+            <span className="social-text">Instagram</span>
+          </a>
+          <a href="#" className="social-icon-link" title="Facebook">
+            <span className="social-text">Facebook</span>
+          </a>
+        </div>
+      </div>
+    </footer>
   );
 }
 

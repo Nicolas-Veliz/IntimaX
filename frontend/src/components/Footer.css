@@ -1,0 +1,140 @@
+/* ==========================================================================
+   ESTILOS PREMIUM INTEGRADOS - RESPONSABLES CON EL MOCKUP
+   ========================================================================== */
+
+.intimax-footer {
+  background-color: #0d0d0e; /* Negro profundo mate */
+  border-top: 1.5px solid rgba(232, 186, 111, 1); /* Línea perimetral dorada superior */
+  padding: 50px 40px 30px 40px;
+  width: 100%;
+  font-family: 'Montserrat', sans-serif;
+  margin-top: 0px; /* Pequeño espacio de separación con las tarjetas */
+}
+
+/* Distribución en 3 columnas iguales del mockup */
+.footer-main-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  padding-bottom: 35px;
+}
+
+/* Estilo de cada bloque vertical */
+.footer-section {
+  padding-right: 20px;
+}
+
+/* Líneas divisorias verticales idénticas al mockup */
+.footer-section:not(:last-child) {
+  border-right: 1px solid rgba(232, 186, 111, 1);
+}
+
+/* --- TEXTOS Y TIPOGRAFÍAS --- */
+.footer-title {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.footer-title .gold-text {
+  color: #E8BA6F; /* Dorado corporativo Intimax */
+}
+
+.footer-text {
+  color: #9CA3AF;
+  font-size: 12px;
+  line-height: 1.8;
+  font-weight: 500;
+}
+
+.footer-highlight {
+  color: #E8BA6F;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.footer-subtext {
+  color: #4B5563;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* --- LÍNEA DIVISORIA INFERIOR --- */
+.footer-divider {
+  max-width: 1400px;
+  margin: 0 auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* --- BARRA BAJA: COPYRIGHT Y SOCIAL MEDIA --- */
+.footer-bottom-bar {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 25px;
+}
+
+.copyright-text {
+  color: #6B7280;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.version-tag {
+  font-family: monospace;
+  font-size: 10px;
+  color: #4B5563;
+  margin-left: 6px;
+}
+
+/* Contenedor de redes sociales minimalistas del pie */
+.footer-social {
+  display: flex;
+  gap: 25px;
+}
+
+.social-icon-link {
+  color: #9CA3AF;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: color 0.2s ease;
+  text-transform: uppercase;
+}
+
+/* Al pasar el mouse por Instagram o Facebook brillan en dorado */
+.social-icon-link:hover {
+  color: #E8BA6F;
+}
+
+/* --- RESPONSIVE ADAPTATIVO --- */
+@media (max-width: 992px) {
+  .footer-main-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    text-align: center;
+  }
+  .footer-section {
+    padding-right: 0;
+    padding-bottom: 20px;
+  }
+  .footer-section:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .footer-bottom-bar {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+}
