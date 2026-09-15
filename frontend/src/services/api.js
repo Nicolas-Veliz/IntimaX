@@ -1,20 +1,17 @@
 import axios from 'axios';
 
+// Use cookies (HttpOnly) for auth; backend must set cookie on login
 const API = axios.create({
-  baseURL: 'http://localhost:3000/api'
+  baseURL: 'http://localhost:3000/api',
+  withCredentials: true,
 });
 
-// Interceptor para agregar el token a todas las peticiones
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+export { API };
 
 // Servicios de autenticación
 export const login = (username, password) => API.post('/auth/login', { username, password });
+export const logout = () => API.post('/auth/logout');
+export const me = () => API.get('/auth/me');
 
 // Servicios de habitaciones
 export const getRooms = () => API.get('/rooms').then(res => res.data);
@@ -32,6 +29,8 @@ export const confirmNoShow = (shift_id) => API.put(`/shifts/${shift_id}/no-show`
 // Servicios de métricas
 export const getTodayMetrics = () => API.get('/metrics/today').then(res => res.data);
 export const getHourlyStats = () => API.get('/metrics/hourly').then(res => res.data);
+export const getDailyMetricsReport = (params = {}) => API.get('/metrics/daily', { params }).then(res => res.data);
+export const getRoomUsage = () => API.get('/metrics/room-usage').then(res => res.data);
 
 //final del archivo
 export const getUsers = () => API.get('/users').then(res => res.data);

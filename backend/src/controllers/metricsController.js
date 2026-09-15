@@ -20,10 +20,33 @@ export const getTodayMetrics = async (req, res) => {
       'SELECT * FROM daily_metrics WHERE date = ?',
       [today]
     );
-    
+
+    let daily = dailyMetrics[0];
+
+    if (!daily) {
+      const [computed] = await pool.execute(
+        `SELECT
+           COALESCE(SUM(price), 0) as total_income,
+           COUNT(*) as total_shifts,
+           COALESCE(SUM(CASE WHEN payment_method = 'cash' THEN price ELSE 0 END), 0) as cash_income,
+           COALESCE(SUM(CASE WHEN payment_method = 'card' THEN price ELSE 0 END), 0) as card_income,
+           COALESCE(SUM(CASE WHEN payment_method = 'transfer' THEN price ELSE 0 END), 0) as transfer_income
+         FROM shifts
+         WHERE DATE(start_time) = ?`,
+        [today]
+      );
+      daily = computed[0] || {
+        total_income: 0,
+        total_shifts: 0,
+        cash_income: 0,
+        card_income: 0,
+        transfer_income: 0
+      };
+    }
+
     res.json({
       current: metrics[0],
-      daily: dailyMetrics[0] || null
+      daily
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -55,14 +78,24 @@ export const getHourlyStats = async (req, res) => {
 export const getDailyReport = async (req, res) => {
   try {
     const { start_date, end_date } = req.query;
-    
-    const [report] = await pool.execute(
-      `SELECT * FROM daily_operations_report 
-       WHERE fecha BETWEEN ? AND ?
-       ORDER BY fecha DESC`,
-      [start_date, end_date]
-    );
-    
+    let query = 'SELECT * FROM daily_metrics';
+    const params = [];
+
+    if (start_date || end_date) {
+      query += ' WHERE 1=1';
+      if (start_date) {
+        query += ' AND date >= ?';
+        params.push(start_date);
+      }
+      if (end_date) {
+        query += ' AND date <= ?';
+        params.push(end_date);
+      }
+    }
+
+    query += ' ORDER BY date DESC';
+
+    const [report] = await pool.execute(query, params);
     res.json(report);
   } catch (error) {
     res.status(500).json({ message: error.message });

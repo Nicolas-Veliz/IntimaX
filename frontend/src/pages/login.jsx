@@ -1,137 +1,10 @@
-{/*import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom'; // 1. IMPORTAMOS THE HOOK DE REDIRECCIÓN
 import logo from '../../../public/img/Logotipo2.jpeg';
+import classImg from '../../../public/img/Class.png';
+import oasisHotelImg from '../../../public/img/oasisHotel.jpg';
 
-<img src={logo} alt="Logo" />
-
-function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    try {
-      await login(username, password);
-      window.location.href = '/';
-    } catch (err) {
-      setError('❌ Usuario o contraseña incorrectos');
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      background: 'linear-gradient(135deg, #000000 50%, #000000 100%)'
-    }}>
-      <div style={{
-        background: 'black',
-        padding: '20px',
-        borderRadius: '10px',
-        width: '450px',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-        
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <img src={logo} alt="" justifyContent="center" display="flex" height="330px" alignItems="center" marginTop="0px" marginLeft="0px"></img>
-        </div>
-        
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', color: '#C8A46A' }}>👤 Usuario</label>
-            <input
-              type="text"
-              placeholder="Ingrese su usuario"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '5px',
-                fontSize: '14px',
-                boxSizing: 'border-box'
-              }}
-              required
-              autoFocus
-            />
-          </div>
-          
-          <div style={{ marginBottom: '25px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', color: '#C8A46A' }}>🔒 Contraseña</label>
-            <input
-              type="password"
-              placeholder="Ingrese su contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '5px',
-                fontSize: '14px',
-                boxSizing: 'border-box'
-              }}
-              required
-            />
-          </div>
-          
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '12px',
-              background: loading ? '#ccc' : '#B11226',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              fontSize: '16px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'background 0.3s'
-            }}
-          >
-            {loading ? 'Ingresando...' : 'INGRESAR'}
-          </button>
-          
-          {error && (
-            <p style={{ color: 'red', textAlign: 'center', marginTop: '15px', fontSize: '14px' }}>
-              {error}
-            </p>
-          )}
-        </form>
-        
-        <div style={{ 
-          marginTop: '25px', 
-          paddingTop: '20px', 
-          borderTop: '1px solid #eee',
-          textAlign: 'center',
-          fontSize: '12px',
-          color: '#999'
-        }}>
-          <p>📋 Credenciales de prueba:</p>
-          <p><strong>Admin:</strong> admin / admin123</p>
-          <p><strong>Recepcionista:</strong> recepcion / recep123</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default Login;*/}
-
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import logo from '../../../public/img/Logotipo2.jpeg';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -140,6 +13,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
+  const navigate = useNavigate(); // 2. INICIALIZAMOS EL NAVEGADOR INTERNO
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -149,7 +23,8 @@ function Login() {
 
     try {
       await login(username, password);
-      window.location.href = '/';
+      // 3. CAMBIO CLAVE: Navegamos internamente sin recargar la app ni perder el contexto
+      navigate('/'); 
     } catch (err) {
       setError('❌ Usuario o contraseña incorrectos');
       setLoading(false);
@@ -229,6 +104,7 @@ function Login() {
                 fontSize: '15px',
                 boxSizing: 'border-box',
                 background: '#f5f5f5',
+                color: '#000000',
                 outline: 'none',
               }}
             />
@@ -261,6 +137,7 @@ function Login() {
                 fontSize: '15px',
                 boxSizing: 'border-box',
                 background: '#f5f5f5',
+                color: '#000000',
                 outline: 'none',
               }}
             />
@@ -301,26 +178,21 @@ function Login() {
           )}
         </form>
 
-        {/* CREDENCIALES */}
+        {/* NUESTROS CLIENTES - CAROUSEL */}
         <div
           style={{
             marginTop: '25px',
             paddingTop: '20px',
             borderTop: '1px solid #333',
             textAlign: 'center',
-            fontSize: '12px',
-            color: '#999',
+            fontSize: '14px',
+            color: '#fff',
           }}
         >
-          <p>📋 Credenciales de prueba:</p>
+          <h3 style={{ color: '#C8A46A', marginBottom: '12px', fontSize: '16px' }}>Nuestros Clientes</h3>
 
-          <p>
-            <strong>Admin:</strong> admin / admin123
-          </p>
-
-          <p>
-            <strong>Recepcionista:</strong> recepcion / recep123
-          </p>
+          {/* Carousel container */}
+          <ClientCarousel />
         </div>
       </div>
     </div>
@@ -328,3 +200,54 @@ function Login() {
 }
 
 export default Login;
+
+function ClientCarousel() {
+  const clientImages = [
+    classImg,
+    oasisHotelImg,
+  ];
+
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCurrent((c) => (c + 1) % clientImages.length);
+    }, 5000); // autoplay más lento: 5 segundos
+    return () => clearInterval(id);
+  }, []);
+
+  const prev = () => setCurrent((c) => (c - 1 + clientImages.length) % clientImages.length);
+  const next = () => setCurrent((c) => (c + 1) % clientImages.length);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 340 }}>
+        <div style={{ overflow: 'hidden', borderRadius: 8, background: 'transparent', padding: 12 }}>
+          <div
+            style={{
+              display: 'flex',
+              width: `${clientImages.length * 100}%`,
+              transform: `translateX(-${current * (100 / clientImages.length)}%)`,
+              transition: 'transform 0.8s ease',
+            }}
+          >
+            {clientImages.map((src, i) => (
+              <div key={i} style={{ flex: `0 0 ${100 / clientImages.length}%`, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <img loading="lazy" src={src} alt={`client-${i}`} style={{ maxWidth: '260px', maxHeight: '110px', objectFit: 'contain' }} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button onClick={prev} aria-label="anterior" style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.45)', color: '#fff', border: 'none', padding: '6px 8px', borderRadius: 6, cursor: 'pointer' }}>‹</button>
+        <button onClick={next} aria-label="siguiente" style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.45)', color: '#fff', border: 'none', padding: '6px 8px', borderRadius: 6, cursor: 'pointer' }}>›</button>
+      </div>
+
+      <div style={{ display: 'flex', gap: 6 }}>
+        {clientImages.map((_, i) => (
+          <button key={i} onClick={() => setCurrent(i)} aria-label={`ir a ${i}`} style={{ width: 8, height: 8, borderRadius: 8, border: 'none', background: i === current ? '#C8A46A' : '#666', cursor: 'pointer' }} />
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -8,22 +8,24 @@ const generateShiftCode = () => {
 };
 
 // Calcular precio basado en duración y tipo de habitación
-const calculatePrice = (room, hours, extraHours = 0) => {
-  const totalHours = hours + extraHours;
-  let price = room.base_price;
-  
-  if (totalHours > hours) {
-    // Si hay horas extra, calcular extra
-    price += extraHours * room.price_per_extra_hour;
-  }
-  
-  return price;
+const calculatePrice = (room, hours) => {
+  return hours === 2 ? room.base_price : room.extended_price;
 };
 
 export const createShift = async (req, res) => {
   try {
-    const { room_id, duration_hours } = req.body;
+    const { room_id, duration_hours: requestedDuration = 2 } = req.body;
+    const duration_hours = Number(requestedDuration);
     const user_id = req.user.id;
+    const currentHour = new Date().getHours();
+
+    if (!Number.isFinite(duration_hours) || duration_hours <= 0) {
+      return res.status(400).json({ message: 'Duración de turno inválida' });
+    }
+
+    if (duration_hours !== 2 && (currentHour < 22 && currentHour >= 8)) {
+      return res.status(403).json({ message: 'El turno extendido solo está disponible entre las 22:00 y las 08:00' });
+    }
     
     // Verificar si la habitación está disponible
     const [rooms] = await pool.execute(
@@ -38,9 +40,24 @@ export const createShift = async (req, res) => {
     const room = rooms[0];
     const end_time = new Date();
     end_time.setHours(end_time.getHours() + duration_hours);
+
+    if (duration_hours !== 2) {
+      const extensionLimit = new Date();
+      if (currentHour >= 22) {
+        extensionLimit.setDate(extensionLimit.getDate() + 1);
+      }
+      extensionLimit.setHours(8, 0, 0, 0);
+      if (end_time > extensionLimit) {
+        return res.status(400).json({ message: 'El turno extendido no puede superar las 08:00' });
+      }
+    }
     
     const shiftCode = generateShiftCode();
-    const price = calculatePrice(room, duration_hours, 0);
+    const price = calculatePrice(room, duration_hours);
+
+    if (duration_hours !== 2 && (price === null || price === undefined || Number(price) <= 0)) {
+      return res.status(400).json({ message: 'La habitación no tiene precio extendido configurado' });
+    }
     
     const [result] = await pool.execute(
       `INSERT INTO shifts (room_id, shift_code, duration_hours, end_time, price, created_by) 
@@ -77,6 +94,10 @@ export const extendShift = async (req, res) => {
     const { id } = req.params;
     const { extra_hours } = req.body;
     const user_id = req.user.id;
+
+    if (!Number.isFinite(Number(extra_hours)) || Number(extra_hours) <= 0) {
+      return res.status(400).json({ message: 'La cantidad de horas extra debe ser mayor a cero' });
+    }
     
     // Obtener shift actual
     const [shifts] = await pool.execute(
@@ -92,12 +113,18 @@ export const extendShift = async (req, res) => {
     }
     
     const shift = shifts[0];
-    const extra_price = extra_hours * shift.price_per_extra_hour;
+    const requestedHours = Number(extra_hours);
+    const pricePerExtraHour = Number(shift.price_per_extra_hour);
+    if (!Number.isFinite(pricePerExtraHour) || pricePerExtraHour <= 0) {
+      return res.status(400).json({ message: 'La habitación no tiene precio por hora extra configurado' });
+    }
+
+    const newEndTime = new Date(shift.end_time);
+    newEndTime.setTime(newEndTime.getTime() + requestedHours * 3600000);
+
+    const extra_price = requestedHours * pricePerExtraHour;
     
     // Actualizar shift
-    const newEndTime = new Date(shift.end_time);
-    newEndTime.setHours(newEndTime.getHours() + extra_hours);
-    
     await pool.execute(
       `UPDATE shifts 
        SET end_time = ?, 
@@ -105,14 +132,14 @@ export const extendShift = async (req, res) => {
            total_hours = duration_hours + (extended_count + 1) * ?,
            price = price + ?
        WHERE id = ?`,
-      [newEndTime, extra_hours, extra_price, id]
+      [newEndTime, requestedHours, extra_price, id]
     );
     
     // Registrar extensión
     await pool.execute(
       `INSERT INTO shift_extensions (shift_id, extra_hours, extra_price, extended_by) 
        VALUES (?, ?, ?, ?)`,
-      [id, extra_hours, extra_price, user_id]
+      [id, requestedHours, extra_price, user_id]
     );
     
     const [updatedShift] = await pool.execute(`

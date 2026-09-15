@@ -1,83 +1,10 @@
-{/*import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/login';
-import Dashboard from './pages/Dashboard';
-import { AuthProvider } from './contexts/AuthContext';
-import PrivateRoute from './components/PrivateRoute';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-
-function App() {
-  return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
-}
-
-export default App;
-
---------------------------------------
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Login from './pages/login';
 import Dashboard from './pages/Dashboard';
-import { AuthProvider } from './contexts/AuthContext';
-import PrivateRoute from './components/PrivateRoute';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-
-// Este componente une tu Navbar y Footer con el contenido de las páginas protegidas
-function ProtectedLayout() {
-  return (
-    <>
-      <Navbar />
-      
-        <Outlet /> {<Dashboard />}
-        <Route path="/" element={<Dashboard />} />
-      
-      <Footer />
-    </>
-  );
-}
-
-function App() {
-  return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          
-          <Route path="/login" element={<Login />} />
-
-          
-          <Route element={<PrivateRoute />}>
-            <Route element={<ProtectedLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              
-            </Route>
-          </Route>
-
-          
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
-}
-
-export default App;*/}
-
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import Login from './pages/login';
-import Dashboard from './pages/Dashboard';
+import About from './pages/About';
+import UsersPanel from './pages/UsersPanel';
+import Reports from './pages/Reports';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
@@ -113,7 +40,9 @@ function App() {
           >
             {/* El Dashboard se queda aquí. React Router lo inyectará dentro del <Outlet /> de arriba */}
             <Route path="/" element={<Dashboard />} />
-            {/* Si en el futuro agregas más páginas como /perfil, van aquí abajo */}
+            <Route path="/about" element={<About />} />
+            <Route path="/users" element={<UsersPanel />} />
+            <Route path="/reports" element={<Reports />} />
           </Route>
 
           {/* Tu redirección por defecto */}
