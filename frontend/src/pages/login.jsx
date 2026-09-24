@@ -90,6 +90,7 @@ function Login() {
             </label>
 
             <input
+              data-cy="username"
               type="text"
               placeholder="Ingrese su usuario"
               value={username}
@@ -124,6 +125,7 @@ function Login() {
             </label>
 
             <input
+              data-cy="password"
               type="password"
               placeholder="Ingrese su contraseña"
               value={password}
@@ -145,6 +147,7 @@ function Login() {
 
           {/* BOTÓN */}
           <button
+            data-cy="login-button"  
             type="submit"
             disabled={loading}
             style={{
