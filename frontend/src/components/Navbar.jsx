@@ -4,24 +4,6 @@ import { useAuth } from '../contexts/AuthContext'; // Importamos el contexto de 
 import { useNavigate } from 'react-router-dom';
 import logoIntimax_Texto from '../assets/logo-texto.png';
 
-const navIconPaths = {
-  rooms: <><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9" /></>,
-  contact: <><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72l.4 2.8a2 2 0 0 1-.57 1.7L7.1 10.06a16 16 0 0 0 6 6l1.84-1.84a2 2 0 0 1 1.7-.57l2.8.4a2 2 0 0 1 1.72 1.87Z" /></>,
-  about: <><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></>,
-  users: <><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6M23 11h-6" /></>,
-  reports: <><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3" /></>,
-  clock: <><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></>,
-  exit: <><path d="M14 17l5-5-5-5M19 12H8M3 5v14a2 2 0 0 0 2 2h6" /></>,
-};
-
-function NavIcon({ name, size = 16, color = '#B11226' }) {
-  return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" focusable="false" style={{ flex: 'none', verticalAlign: 'middle' }}>
-      {navIconPaths[name]}
-    </svg>
-  );
-}
-
 export const Navbar = ({ currentPage, setCurrentPage }) => {
   const [hora, setHora] = useState('');
   const { user, logout } = useAuth(); // Extraemos los datos del usuario logueado y la función logout
@@ -65,13 +47,13 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
           className={`nav-btn ${currentPage === 'rooms' ? 'active' : ''}`}
           onClick={() => handleNavigation('rooms', '/')}
         >
-          <><NavIcon name="rooms" /><span>ROOMS</span></>
+          🏨 ROOMS
         </button>
         <button 
           className={`nav-btn ${currentPage === 'contact' ? 'active' : ''}`}
           onClick={() => setCurrentPage('contact')}
         >
-          <><NavIcon name="contact" /><span>CONTACT</span></>
+          📞 CONTACT
         </button>
       </div>
 
@@ -87,23 +69,23 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
           className={`nav-btn ${currentPage === 'about' ? 'active' : ''}`}
           onClick={() => handleNavigation('about', '/about')}
         >
-          <><NavIcon name="about" /><span>ABOUT</span></>
+          ℹ️ ABOUT
         </button>
 
-        {/* Pestañas exclusivas para el Administrador */}
+        {/* 🔒 Pestañas exclusivas para el Administrador */}
         {user?.role === 'admin' && (
           <>
             <button 
               className={`nav-btn ${currentPage === 'users' ? 'active' : ''}`}
               onClick={() => handleNavigation('users', '/users')}
             >
-              <><NavIcon name="users" /><span>USERS</span></>
+              👥 USERS
             </button>
             <button 
               className={`nav-btn ${currentPage === 'reports' ? 'active' : ''}`}
               onClick={() => handleNavigation('reports', '/reports')}
             >
-              <><NavIcon name="reports" /><span>REPORTS</span></>
+              📊 REPORTS
             </button>
           </>
         )}
@@ -112,7 +94,7 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
       {/* Estado de la Cuenta Activa y Reloj */}
       <div className="header-right-status">
         <div className="time-display">
-          <NavIcon name="clock" />
+          <span className="time-icon">⏰</span>
           <span className="time-text">{hora || "Cargando..."}</span>
         </div>
         
@@ -132,10 +114,7 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
           </div>
         </div>
         
-        <button className="logout-btn" onClick={handleLogout}>
-          <NavIcon name="exit" color="#C8A46A" />
-          <span>EXIT</span>
-        </button>
+        <button className="logout-btn" onClick={handleLogout}>🚪 EXIT</button>
       </div>
 
     </header>

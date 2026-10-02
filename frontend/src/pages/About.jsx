@@ -1,19 +1,13 @@
 ﻿import { Container, Card, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-const teamPhotos = import.meta.glob('../assets/{nicolas,santiago,bruno}.png', {
-  eager: true,
-  import: 'default',
-  query: '?url'
-});
-
 const About = () => {
   const navigate = useNavigate();
 
   const teamMembers = [
-    { name: 'Veliz Nicolás', role: 'Desarrollador Full Stack', photo: teamPhotos['../assets/nicolas.png'] },
-    { name: 'Santiago Robles', role: 'Desarrollador Full Stack', photo: teamPhotos['../assets/santiago.png'] },
-    { name: 'Bruno Ojeda', role: 'Desarrollador Full Stack', photo: teamPhotos['../assets/bruno.png'] }
+    { name: 'Veliz Nicolás', role: 'Desarrollador Full Stack' },
+    { name: 'Santiago Robles', role: 'Desarrollador Full Stack' },
+    { name: 'Bruno Ojeda', role: 'Desarrollador Full Stack' }
   ];
 
   return (
@@ -51,33 +45,18 @@ const About = () => {
                   padding: '20px 12px'
                 }}
               >
-                <div
+                <img
+                  src="https://media.istockphoto.com/id/1384874531/es/vector/silueta-de-hombre-de-traje-avatar-no-identificado.jpg?s=612x612&w=0&k=20&c=9vuS9E6RA0ZM0oOSxD0zVaxc6DvDwwDCrtYFJrq4sMU="
+                  alt={member.name}
                   style={{
                     width: '180px',
                     height: '180px',
+                    objectFit: 'cover',
                     borderRadius: '50%',
                     margin: '0 auto 16px',
-                    border: '3px solid #E8BA6F',
-                    background: '#000000',
-                    overflow: 'hidden'
+                    border: '3px solid #E8BA6F'
                   }}
-                >
-                  {member.photo && (
-                    <img
-                      src={member.photo}
-                      alt={member.name}
-                      onError={(event) => {
-                        event.currentTarget.style.display = 'none';
-                      }}
-                      style={{
-                        display: 'block',
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                    />
-                  )}
-                </div>
+                />
                 <Card.Body className="p-0">
                   <Card.Title style={{ color: '#ffffff', marginBottom: '6px' }}>{member.name}</Card.Title>
                   <Card.Text style={{ color: '#C8A46A', marginBottom: 0 }}>{member.role}</Card.Text>

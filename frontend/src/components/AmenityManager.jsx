@@ -233,8 +233,8 @@ function AmenityManager({ onClose, room, onConsumed }) {
     const logoSvg = encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" width="220" height="70" viewBox="0 0 220 70">
         <rect width="220" height="70" rx="10" fill="#0f0f10"/>
-        <text x="110" y="34" font-family="Montserrat, sans-serif" font-size="28" font-weight="700" fill="#E8BA6F" text-anchor="middle">INTIMAX</text>
-        <text x="110" y="54" font-family="Montserrat, sans-serif" font-size="11" fill="#C8A46A" text-anchor="middle">HOTEL & RECREATION</text>
+        <text x="110" y="34" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#E8BA6F" text-anchor="middle">INTIMAX</text>
+        <text x="110" y="54" font-family="Arial, sans-serif" font-size="11" fill="#C8A46A" text-anchor="middle">HOTEL & RECREATION</text>
       </svg>
     `);
 
@@ -242,9 +242,8 @@ function AmenityManager({ onClose, room, onConsumed }) {
       <html>
         <head>
           <title>Comprobante INTIMAX</title>
-          <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
           <style>
-            body { font-family: 'Montserrat', sans-serif; padding: 24px; color: #111; }
+            body { font-family: Arial, sans-serif; padding: 24px; color: #111; }
             .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
             .logo { width: 180px; }
             .box { border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-top: 12px; }

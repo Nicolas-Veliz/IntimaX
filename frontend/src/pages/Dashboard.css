@@ -193,7 +193,7 @@
 .room-timer {
   font-size: 32px;
   font-weight: 700;
-  font-family: 'Montserrat', sans-serif;
+  font-family: monospace;
   color: #00ff88;
   margin: 15px 0;
   background: #000000;
@@ -784,7 +784,7 @@
 
 .table-index { color: #4B5563; font-weight: 700; }
 .table-room-num { min-width: 110px; font-weight: 700; white-space: nowrap; }
-.table-room-price { color: #00ff88; font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: bold; }
+.table-room-price { color: #00ff88; font-family: monospace; font-size: 15px; font-weight: bold; }
 .table-room-type { min-width: 170px; max-width: 220px; }
 
 /* Badges para el tipo de habitación en la tabla */
