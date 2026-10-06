@@ -6,6 +6,7 @@ import './Dashboard.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import AmenityManager from '../components/AmenityManager';
+import { confirmAction, requestNumber, showAlert, showToast } from '../services/alerts';
 
 const socket = io('http://localhost:3000');
 
@@ -13,7 +14,6 @@ function Dashboard() {
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [duration, setDuration] = useState(2);
-  const [notifications, setNotifications] = useState([]);
   const [metrics, setMetrics] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState('rooms');
@@ -146,7 +146,7 @@ function Dashboard() {
         await updateUser(editingUser.id, { ...userForm, is_active: 1 });
       } else {
         if (!userForm.password) {
-          alert('La contraseña es obligatoria para crear un usuario.');
+          showAlert('La contraseña es obligatoria para crear un usuario.', 'warning');
           return;
         }
         await createUser(userForm);
@@ -155,7 +155,7 @@ function Dashboard() {
       await loadUsers();
       resetUserForm();
     } catch (error) {
-      alert('Error al guardar usuario: ' + (error.response?.data?.message || error.message));
+      showAlert('Error al guardar usuario: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -175,7 +175,10 @@ function Dashboard() {
   };
 
   const handleDeleteUser = async (user) => {
-    if (window.confirm(`¿Eliminar a ${user.first_name} ${user.last_name}?`)) {
+    if (await confirmAction(`¿Eliminar a ${user.first_name} ${user.last_name}?`, {
+      title: 'Eliminar usuario',
+      confirmButtonText: 'Sí, eliminar'
+    })) {
       try {
         await deleteUser(user.id);
         if (editingUser?.id === user.id) {
@@ -183,7 +186,7 @@ function Dashboard() {
         }
         await loadUsers();
       } catch (error) {
-        alert('Error al eliminar usuario: ' + (error.response?.data?.message || error.message));
+        showAlert('Error al eliminar usuario: ' + (error.response?.data?.message || error.message), 'error');
       }
     }
   };
@@ -250,7 +253,7 @@ function Dashboard() {
       await loadRooms();
       resetRoomForm();
     } catch (error) {
-      alert('Error al guardar habitación: ' + (error.response?.data?.message || error.message));
+      showAlert('Error al guardar habitación: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -268,7 +271,10 @@ function Dashboard() {
   };
 
   const handleDeleteRoom = async (room) => {
-    if (!window.confirm(`¿Eliminar la habitación ${room.room_number}?`)) return;
+    if (!await confirmAction(`¿Eliminar la habitación ${room.room_number}?`, {
+      title: 'Eliminar habitación',
+      confirmButtonText: 'Sí, eliminar'
+    })) return;
 
     try {
       await deleteRoom(room.id);
@@ -277,7 +283,7 @@ function Dashboard() {
       }
       await loadRooms();
     } catch (error) {
-      alert('Error al eliminar habitación: ' + (error.response?.data?.message || error.message));
+      showAlert('Error al eliminar habitación: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -307,27 +313,26 @@ function Dashboard() {
   };
 
   const handleExtendTime = async (room) => {
-    const extraHours = prompt('¿Cuántas horas extra desea agregar?', '1');
+    const extraHours = await requestNumber({
+      title: `Extender habitación ${room.room_number}`,
+      text: '¿Cuántas horas extra desea agregar?',
+      value: 1
+    });
     if (extraHours === null) return;
 
-    const parsedExtraHours = Number(extraHours);
-    if (!Number.isFinite(parsedExtraHours) || parsedExtraHours <= 0) {
-      alert('Ingrese una cantidad de horas válida.');
-      return;
-    }
-
     try {
-      await extendShift(room.shift_id, parsedExtraHours);
-      addNotification(`⏰ Habitación ${room.room_number} extendida ${parsedExtraHours} hora(s)`, 'success');
+      await extendShift(room.shift_id, extraHours);
+      addNotification(`⏰ Habitación ${room.room_number} extendida ${extraHours} hora(s)`, 'success');
       await loadRooms();
     } catch (error) {
-      alert('Error al extender tiempo: ' + (error.response?.data?.message || error.message));
+      showAlert('Error al extender tiempo: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
   const handleCheckout = async (room) => {
-    const confirmed = window.confirm(
-      `¿Está seguro que desea detener el tiempo de la habitación ${room.room_number}?`
+    const confirmed = await confirmAction(
+      `¿Está seguro que desea detener el tiempo de la habitación ${room.room_number}?`,
+      { title: 'Detener turno', confirmButtonText: 'Sí, detener' }
     );
 
     if (!confirmed) {
@@ -341,7 +346,7 @@ function Dashboard() {
       loadRooms();
       addNotification('✋ Turno detenido', 'success');
     } catch (error) {
-      alert('Error al detener turno');
+      showAlert('Error al detener turno', 'error');
     }
   };
 
@@ -355,7 +360,7 @@ function Dashboard() {
         setRoomForInitialPayment(null);
         addNotification('🎉 Turno iniciado correctamente', 'success');
       } catch (error) {
-        alert('Error al iniciar turno');
+        showAlert('Error al iniciar turno', 'error');
       }
     }
     // Si es pago final (al terminar turno)
@@ -367,7 +372,7 @@ function Dashboard() {
         setShowPaymentModal(false);
         setRoomForCheckout(null);
       } catch (error) {
-        alert('Error al registrar pago');
+        showAlert('Error al registrar pago', 'error');
       }
     }
   };
@@ -378,13 +383,14 @@ function Dashboard() {
       loadRooms();
       addNotification('✨ Habitación limpia', 'success');
     } catch (error) {
-      alert('Error al marcar limpieza');
+      showAlert('Error al marcar limpieza', 'error');
     }
   };
 
-  const handleExpiredShift = (room) => {
-    const confirmCleaning = window.confirm(
-      `Turno habitación ${room.room_number} terminó. ¿Desea pasar a limpieza?`
+  const handleExpiredShift = async (room) => {
+    const confirmCleaning = await confirmAction(
+      `Turno habitación ${room.room_number} terminó. ¿Desea pasar a limpieza?`,
+      { title: 'Turno finalizado', confirmButtonText: 'Pasar a limpieza' }
     );
 
     if (!confirmCleaning) return;
@@ -443,8 +449,9 @@ function Dashboard() {
   };
 
   const finishCleaning = async (room) => {
-    const confirmDone = window.confirm(
-      `Habitación ${room.room_number} limpia. ¿Poner en disponible?`
+    const confirmDone = await confirmAction(
+      `Habitación ${room.room_number} limpia. ¿Poner en disponible?`,
+      { title: 'Limpieza finalizada', confirmButtonText: 'Poner disponible' }
     );
 
     if (!confirmDone) {
@@ -463,11 +470,7 @@ function Dashboard() {
   };
 
   const addNotification = (message, type) => {
-    const id = Date.now();
-    setNotifications(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-    }, 5000);
+    showToast(message, type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'success');
   };
 
   // Formatear tiempo restante
@@ -1130,14 +1133,6 @@ function Dashboard() {
         </div>
       )}
 
-      {/* NOTIFICACIONES */}
-      <div className="notifications-container">
-        {notifications.map(n => (
-          <div key={n.id} className={`notification ${n.type}`}>
-            {n.message}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUsers, createUser, updateUser, deleteUser } from '../services/api';
+import { confirmAction, showAlert } from '../services/alerts';
 
 function UsersPanel() {
   const [users, setUsers] = useState([]);
@@ -63,7 +64,7 @@ function UsersPanel() {
         await updateUser(editingUser.id, { ...formData, is_active: 1 });
       } else {
         if (!formData.password) {
-          alert('La contraseña es obligatoria para crear un usuario.');
+          showAlert('La contraseña es obligatoria para crear un usuario.', 'warning');
           return;
         }
         await createUser(formData);
@@ -72,12 +73,15 @@ function UsersPanel() {
       await loadUsers();
       resetForm();
     } catch (error) {
-      alert('Error al guardar usuario: ' + (error.response?.data?.message || error.message));
+      showAlert('Error al guardar usuario: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
   const handleDelete = async (user) => {
-    if (window.confirm(`¿Eliminar a ${user.first_name} ${user.last_name}?`)) {
+    if (await confirmAction(`¿Eliminar a ${user.first_name} ${user.last_name}?`, {
+      title: 'Eliminar usuario',
+      confirmButtonText: 'Sí, eliminar'
+    })) {
       try {
         await deleteUser(user.id);
         if (editingUser?.id === user.id) {
@@ -85,7 +89,7 @@ function UsersPanel() {
         }
         await loadUsers();
       } catch (error) {
-        alert('Error al eliminar usuario: ' + (error.response?.data?.message || error.message));
+        showAlert('Error al eliminar usuario: ' + (error.response?.data?.message || error.message), 'error');
       }
     }
   };

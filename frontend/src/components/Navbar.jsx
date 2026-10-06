@@ -3,6 +3,7 @@ import './navbar.css';
 import { useAuth } from '../contexts/AuthContext'; // Importamos el contexto de autenticación
 import { useNavigate } from 'react-router-dom';
 import logoIntimax_Texto from '../assets/logo-texto.png';
+import { confirmAction } from '../services/alerts';
 
 const navIconPaths = {
   rooms: <><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9" /></>,
@@ -49,8 +50,11 @@ export const Navbar = ({ currentPage, setCurrentPage }) => {
     if (path) navigate(path);
   };
   // Función prolija para manejar el cierre de sesión
-  const handleLogout = () => {
-    if (confirm('¿Está seguro de que desea salir del sistema?')) {
+  const handleLogout = async () => {
+    if (await confirmAction('¿Está seguro de que desea salir del sistema?', {
+      title: 'Cerrar sesión',
+      confirmButtonText: 'Sí, salir'
+    })) {
       logout();
       window.location.href = '/login';
     }

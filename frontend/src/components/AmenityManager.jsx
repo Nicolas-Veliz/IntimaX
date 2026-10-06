@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { API } from '../services/api';
+import { confirmAction, showAlert, showToast } from '../services/alerts';
 
 function AmenityManager({ onClose, room, onConsumed }) {
   const [amenities, setAmenities] = useState([]);
@@ -90,12 +91,15 @@ function AmenityManager({ onClose, room, onConsumed }) {
       });
     } catch (error) {
       console.error('Error saving amenity:', error);
-      alert('Error al guardar el amenity');
+      showAlert('Error al guardar el amenity', 'error');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar este amenity?')) return;
+    if (!await confirmAction('¿Estás seguro de eliminar este amenity?', {
+      title: 'Eliminar amenity',
+      confirmButtonText: 'Sí, eliminar'
+    })) return;
 
     try {
       await API.delete(`/amenities/${id}`);
@@ -103,7 +107,7 @@ function AmenityManager({ onClose, room, onConsumed }) {
       await checkLowStock();
     } catch (error) {
       console.error('Error deleting amenity:', error);
-      alert('Error al eliminar');
+      showAlert('Error al eliminar', 'error');
     }
   };
 
@@ -145,7 +149,10 @@ function AmenityManager({ onClose, room, onConsumed }) {
   const handleRemoveFromRoom = async (consumptionItem) => {
     if (!consumptionItem?.id) return;
 
-    const confirmed = window.confirm(`¿Desea quitar ${consumptionItem.name} de la habitación ${room?.room_number}?`);
+    const confirmed = await confirmAction(`¿Desea quitar ${consumptionItem.name} de la habitación ${room?.room_number}?`, {
+      title: 'Quitar consumo',
+      confirmButtonText: 'Sí, quitar'
+    });
     if (!confirmed) return;
 
     try {
@@ -164,10 +171,10 @@ function AmenityManager({ onClose, room, onConsumed }) {
         });
       }
 
-      alert(`🗑️ ${consumptionItem.name} eliminado correctamente`);
+      showToast(`🗑️ ${consumptionItem.name} eliminado correctamente`);
     } catch (error) {
       console.error('Error removing amenity consumption:', error);
-      alert('No se pudo eliminar el consumo');
+      showAlert('No se pudo eliminar el consumo', 'error');
     } finally {
       setIsAdding(false);
     }
@@ -175,11 +182,14 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
   const handleAddToRoom = async (amenity) => {
     if (!room?.shift_id) {
-      alert('No hay un turno activo para esta habitación');
+      showAlert('No hay un turno activo para esta habitación', 'warning');
       return;
     }
 
-    const confirmed = window.confirm(`¿Desea agregar ${amenity.name} a la habitación ${room.room_number}?`);
+    const confirmed = await confirmAction(`¿Desea agregar ${amenity.name} a la habitación ${room.room_number}?`, {
+      title: 'Agregar consumo',
+      confirmButtonText: 'Sí, agregar'
+    });
     if (!confirmed) return;
 
     try {
@@ -214,10 +224,10 @@ function AmenityManager({ onClose, room, onConsumed }) {
         date: new Date().toLocaleString('es-AR')
       });
 
-      alert(`✅ ${amenity.name} agregado correctamente`);
+      showToast(`✅ ${amenity.name} agregado correctamente`);
     } catch (error) {
       console.error('Error consuming amenity:', error);
-      alert('No se pudo agregar el amenity a la habitación');
+      showAlert('No se pudo agregar el amenity a la habitación', 'error');
     } finally {
       setIsAdding(false);
     }
@@ -226,7 +236,7 @@ function AmenityManager({ onClose, room, onConsumed }) {
   const openReceipt = (receiptData) => {
     const printWindow = window.open('', '_blank', 'width=900,height=700');
     if (!printWindow) {
-      alert('El navegador bloqueó la ventana de impresión');
+      showAlert('El navegador bloqueó la ventana de impresión', 'warning');
       return;
     }
 

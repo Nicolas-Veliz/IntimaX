@@ -1,0 +1,49 @@
+.swal2-popup.intimax-swal-popup {
+  background: #111112;
+  color: #ffffff;
+  border: 1px solid #E8BA6F;
+  border-radius: 6px;
+}
+
+.intimax-swal-popup .intimax-swal-title {
+  color: #E8BA6F;
+}
+
+.intimax-swal-popup .intimax-swal-text {
+  color: #ffffff;
+}
+
+.intimax-swal-popup .intimax-swal-confirm,
+.intimax-swal-popup .intimax-swal-cancel {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.intimax-swal-popup .intimax-swal-confirm {
+  background: #E8BA6F;
+  color: #000000;
+}
+
+.intimax-swal-popup .intimax-swal-confirm:hover {
+  background: #d3a356;
+}
+
+.intimax-swal-popup .intimax-swal-cancel {
+  background: #303033;
+  color: #ffffff;
+}
+
+.swal2-popup.intimax-swal-toast {
+  border: 1px solid #C8A46A;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.intimax-swal-toast .swal2-title {
+  color: #ffffff;
+  font-size: 14px;
+}
