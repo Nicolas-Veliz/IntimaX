@@ -12,10 +12,17 @@ body,
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background: #000000;
   color: #ffffff;
   min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 /* --- CONFIGURACIÓN DE LOGOS CORPORATIVOS --- */
