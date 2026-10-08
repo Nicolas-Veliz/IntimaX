@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUsers, createUser, updateUser, deleteUser } from '../services/api';
-import { confirmAction, showAlert } from '../services/alerts';
+import { confirmAction, showAlert, showToast } from '../services/alerts';
 
 function UsersPanel() {
   const [users, setUsers] = useState([]);
@@ -59,6 +59,7 @@ function UsersPanel() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const wasEditing = Boolean(editingUser);
     try {
       if (editingUser) {
         await updateUser(editingUser.id, { ...formData, is_active: 1 });
@@ -72,6 +73,7 @@ function UsersPanel() {
 
       await loadUsers();
       resetForm();
+      showToast(wasEditing ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente');
     } catch (error) {
       showAlert('Error al guardar usuario: ' + (error.response?.data?.message || error.message), 'error');
     }
@@ -88,6 +90,7 @@ function UsersPanel() {
           resetForm();
         }
         await loadUsers();
+        showToast('Usuario eliminado correctamente');
       } catch (error) {
         showAlert('Error al eliminar usuario: ' + (error.response?.data?.message || error.message), 'error');
       }

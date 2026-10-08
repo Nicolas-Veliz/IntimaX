@@ -141,6 +141,7 @@ function Dashboard() {
 
   const handleUserSubmit = async (e) => {
     e.preventDefault();
+    const wasEditing = Boolean(editingUser);
     try {
       if (editingUser) {
         await updateUser(editingUser.id, { ...userForm, is_active: 1 });
@@ -154,6 +155,7 @@ function Dashboard() {
 
       await loadUsers();
       resetUserForm();
+      showToast(wasEditing ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente');
     } catch (error) {
       showAlert('Error al guardar usuario: ' + (error.response?.data?.message || error.message), 'error');
     }
@@ -185,6 +187,7 @@ function Dashboard() {
           resetUserForm();
         }
         await loadUsers();
+        showToast('Usuario eliminado correctamente');
       } catch (error) {
         showAlert('Error al eliminar usuario: ' + (error.response?.data?.message || error.message), 'error');
       }
@@ -234,6 +237,7 @@ function Dashboard() {
 
   const handleRoomSubmit = async (e) => {
     e.preventDefault();
+    const wasEditing = Boolean(editingRoom);
     try {
       const roomData = {
         ...roomForm,
@@ -252,6 +256,7 @@ function Dashboard() {
 
       await loadRooms();
       resetRoomForm();
+      showToast(wasEditing ? 'Habitación actualizada correctamente' : 'Habitación creada correctamente');
     } catch (error) {
       showAlert('Error al guardar habitación: ' + (error.response?.data?.message || error.message), 'error');
     }
@@ -282,6 +287,7 @@ function Dashboard() {
         resetRoomForm();
       }
       await loadRooms();
+      showToast(`Habitación ${room.room_number} eliminada correctamente`);
     } catch (error) {
       showAlert('Error al eliminar habitación: ' + (error.response?.data?.message || error.message), 'error');
     }
