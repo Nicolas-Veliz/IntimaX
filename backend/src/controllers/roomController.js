@@ -20,7 +20,7 @@ export const getRooms = async (req, res) => {
           GROUP BY room_id
         ) latest ON s1.id = latest.latest_shift_id
       ) s ON r.id = s.room_id
-      ORDER BY r.room_number
+      ORDER BY CAST(r.room_number AS UNSIGNED), r.room_number, r.id
     `);
     res.json(rooms);
   } catch (error) {
