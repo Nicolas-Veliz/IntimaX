@@ -5,8 +5,12 @@ import './index.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'sweetalert2/dist/sweetalert2.min.css'
 
+import { LanguageProvider } from './contexts/LanguageContext.jsx'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
   </React.StrictMode>,
 )

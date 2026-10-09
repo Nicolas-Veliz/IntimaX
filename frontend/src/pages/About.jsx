@@ -1,5 +1,6 @@
 ﻿import { Container, Card, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const teamPhotos = import.meta.glob('../assets/{nicolas,santiago,bruno}.png', {
   eager: true,
@@ -10,37 +11,90 @@ const teamPhotos = import.meta.glob('../assets/{nicolas,santiago,bruno}.png', {
 const About = () => {
   const navigate = useNavigate();
 
+  const { translations: t } = useLanguage();
+
   const teamMembers = [
-    { name: 'Veliz Nicolás', role: 'Desarrollador Full Stack', photo: teamPhotos['../assets/nicolas.png'] },
-    { name: 'Santiago Robles', role: 'Desarrollador Full Stack', photo: teamPhotos['../assets/santiago.png'] },
-    { name: 'Bruno Ojeda', role: 'Desarrollador Full Stack', photo: teamPhotos['../assets/bruno.png'] }
+    {
+      name: 'Veliz Nicolás',
+      photo: teamPhotos['../assets/nicolas.png']
+    },
+    {
+      name: 'Santiago Robles',
+      photo: teamPhotos['../assets/santiago.png']
+    },
+    {
+      name: 'Bruno Ojeda',
+      photo: teamPhotos['../assets/bruno.png']
+    }
   ];
 
   return (
-    <div className="AboutUs" style={{ minHeight: '100vh', background: '#000000', color: '#ffffff', padding: '40px 20px' }}>
+    <div
+      className="AboutUs"
+      style={{
+        minHeight: '100vh',
+        background: '#000000',
+        color: '#ffffff',
+        padding: '40px 20px'
+      }}
+    >
       <Container>
+
         <Row className="justify-content-center text-center mb-4">
           <Col lg={8}>
-            <h1 style={{ color: '#E8BA6F', fontWeight: 800, marginBottom: '16px' }}>
-              ¡Bienvenidos a IntimaX System!
+
+            <h1
+              style={{
+                color: '#E8BA6F',
+                fontWeight: 800,
+                marginBottom: '16px'
+              }}
+            >
+              {t.about.welcome}
             </h1>
-            <p style={{ color: '#d1d5db', fontSize: '1.05rem', lineHeight: 1.7 }}>
-              Somos un equipo de jóvenes y apasionados programadores que creamos y desarrollamos
-              una plataforma de gestión hotelera. Nuestro sistema ofrece herramientas de autogestión
-              y reservas online para optimizar la administración y mejorar la experiencia de los clientes.
+
+            <p
+              style={{
+                color: '#d1d5db',
+                fontSize: '1.05rem',
+                lineHeight: 1.7
+              }}
+            >
+              {t.about.description}
             </p>
+
           </Col>
         </Row>
 
-        <div style={{ borderTop: '1px solid rgba(232, 186, 111, 0.25)', margin: '32px 0 24px' }} />
+        <div
+          style={{
+            borderTop: '1px solid rgba(232, 186, 111, 0.25)',
+            margin: '32px 0 24px'
+          }}
+        />
 
         <div className="text-center mb-4">
-          <h3 style={{ color: '#E8BA6F', fontWeight: 700 }}>Conoce a nuestro equipo</h3>
+          <h3
+            style={{
+              color: '#E8BA6F',
+              fontWeight: 700
+            }}
+          >
+            {t.about.meetTeam}
+          </h3>
         </div>
 
         <Row className="justify-content-center g-4 mb-4">
+
           {teamMembers.map((member) => (
-            <Col key={member.name} md={4} sm={6} xs={12}>
+
+            <Col
+              key={member.name}
+              md={4}
+              sm={6}
+              xs={12}
+            >
+
               <Card
                 className="h-100 border-0"
                 style={{
@@ -51,6 +105,7 @@ const About = () => {
                   padding: '20px 12px'
                 }}
               >
+
                 <div
                   style={{
                     width: '180px',
@@ -62,7 +117,9 @@ const About = () => {
                     overflow: 'hidden'
                   }}
                 >
+
                   {member.photo && (
+
                     <img
                       src={member.photo}
                       alt={member.name}
@@ -76,18 +133,43 @@ const About = () => {
                         objectFit: 'cover'
                       }}
                     />
+
                   )}
+
                 </div>
+
                 <Card.Body className="p-0">
-                  <Card.Title style={{ color: '#ffffff', marginBottom: '6px' }}>{member.name}</Card.Title>
-                  <Card.Text style={{ color: '#C8A46A', marginBottom: 0 }}>{member.role}</Card.Text>
+
+                  <Card.Title
+                    style={{
+                      color: '#ffffff',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    {member.name}
+                  </Card.Title>
+
+                  <Card.Text
+                    style={{
+                      color: '#C8A46A',
+                      marginBottom: 0
+                    }}
+                  >
+                    {t.about.developer}
+                  </Card.Text>
+
                 </Card.Body>
+
               </Card>
+
             </Col>
+
           ))}
+
         </Row>
 
         <div className="text-center mt-4">
+
           <button
             onClick={() => navigate('/')}
             style={{
@@ -102,9 +184,11 @@ const About = () => {
               boxShadow: '0 0 12px rgba(232, 186, 111, 0.25)'
             }}
           >
-            VOLVER AL DASHBOARD
+            {t.about.backToDashboard}
           </button>
+
         </div>
+
       </Container>
     </div>
   );

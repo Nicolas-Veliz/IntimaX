@@ -8,7 +8,7 @@
   padding: 50px 40px 30px 40px;
   width: 100%;
   font-family: 'Montserrat', sans-serif;
-  margin-top: 0px; /* Pequeño espacio de separación con las tarjetas */
+  margin-top: 0px;
 }
 
 /* Distribución en 3 columnas iguales del mockup */
@@ -26,12 +26,15 @@
   padding-right: 20px;
 }
 
-/* Líneas divisorias verticales idénticas al mockup */
+/* Líneas divisorias verticales */
 .footer-section:not(:last-child) {
   border-right: 1px solid rgba(232, 186, 111, 1);
 }
 
-/* --- TEXTOS Y TIPOGRAFÍAS --- */
+/* ==========================================================================
+   TEXTOS Y TIPOGRAFÍAS
+   ========================================================================== */
+
 .footer-title {
   color: #ffffff;
   font-size: 15px;
@@ -42,7 +45,7 @@
 }
 
 .footer-title .gold-text {
-  color: #E8BA6F; /* Dorado corporativo Intimax */
+  color: #E8BA6F;
 }
 
 .footer-text {
@@ -63,17 +66,100 @@
   color: #4B5563;
   font-size: 11px;
   font-weight: 600;
-  margin-top: 2px;
+  margin-top: 12px;
+  text-align: center;
+
+  /* Baja solamente el texto sin agrandar la sección */
+  transform: translateY(45px);
+}
+/* ==========================================================================
+   CONTACTO POR WHATSAPP
+   ========================================================================== */
+
+.whatsapp-team {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 14px;
+  margin-bottom: 10px;
 }
 
-/* --- LÍNEA DIVISORIA INFERIOR --- */
+.whatsapp-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  color: #9CA3AF !important;
+  text-decoration: none !important;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* Ícono de WhatsApp */
+.whatsapp-contact .whatsapp-icon {
+  width: 18px !important;
+  height: 18px !important;
+
+  min-width: 18px !important;
+  min-height: 18px !important;
+
+  max-width: 18px !important;
+  max-height: 18px !important;
+
+  display: inline-block !important;
+
+  color: #E8BA6F !important;
+  fill: currentColor !important;
+
+  flex: 0 0 18px !important;
+
+  vertical-align: middle;
+}
+
+/* Nombre de cada integrante */
+.whatsapp-contact span {
+  color: #9CA3AF !important;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none !important;
+  line-height: 1;
+}
+
+/* Efecto al pasar el mouse */
+.whatsapp-contact:hover {
+  transform: translateX(4px);
+}
+
+.whatsapp-contact:hover span {
+  color: #E8BA6F !important;
+}
+
+.whatsapp-contact:hover .whatsapp-icon {
+  color: #E8BA6F !important;
+  transform: scale(1.1);
+}
+
+/* ==========================================================================
+   LÍNEA DIVISORIA INFERIOR
+   ========================================================================== */
+
 .footer-divider {
   max-width: 1400px;
   margin: 0 auto;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* --- BARRA BAJA: COPYRIGHT Y SOCIAL MEDIA --- */
+/* ==========================================================================
+   BARRA BAJA: COPYRIGHT
+   ========================================================================== */
+
 .footer-bottom-bar {
   max-width: 1400px;
   margin: 0 auto;
@@ -99,24 +185,37 @@
   margin-left: 6px;
 }
 
-/* --- RESPONSIVE ADAPTATIVO --- */
+/* ==========================================================================
+   RESPONSIVE ADAPTATIVO
+   ========================================================================== */
+
 @media (max-width: 992px) {
+
   .footer-main-content {
     grid-template-columns: 1fr;
     gap: 30px;
     text-align: center;
   }
+
   .footer-section {
     padding-right: 0;
     padding-bottom: 20px;
   }
+
   .footer-section:not(:last-child) {
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
+
   .footer-bottom-bar {
     flex-direction: column;
     gap: 15px;
     text-align: center;
+  }
+
+  .whatsapp-team {
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
   }
 }

@@ -178,3 +178,58 @@
   display: block;
   text-align: center;
 }
+
+/* ==========================================================================
+   SELECTOR DE IDIOMA
+   ========================================================================== */
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  height: 36px;
+  padding: 0 10px;
+
+  background: rgba(232, 186, 111, 0.08);
+  border: 1px solid rgba(232, 186, 111, 0.30);
+  border-radius: 8px;
+}
+
+.language-globe {
+  font-size: 14px;
+  margin-right: 2px;
+}
+
+.language-option {
+  background: transparent;
+  border: none;
+  padding: 2px 3px;
+
+  color: #8d8d8d;
+
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.language-option:hover {
+  color: #E8BA6F;
+}
+
+.language-option.active {
+  color: #E8BA6F;
+}
+
+.language-divider {
+  color: rgba(232, 186, 111, 0.40);
+  font-size: 12px;
+}
