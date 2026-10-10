@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getUsers, createUser, updateUser, deleteUser } from '../services/api';
 
 import { confirmAction, showAlert, showToast } from '../services/alerts';
+import Navbar from '../components/Navbar';
 
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -258,7 +259,7 @@ function UsersPanel() {
   return (
 
     <div className="admin-panel users-panel">
-
+      <Navbar currentPage="users" setCurrentPage={() => {}} />
       <div className="manage-users-page">
 
         <div className="manage-users-container">

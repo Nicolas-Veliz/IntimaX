@@ -1,6 +1,7 @@
 ﻿import { Container, Card, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import Navbar from '../components/Navbar';
 
 const teamPhotos = import.meta.glob('../assets/{nicolas,santiago,bruno}.png', {
   eager: true,
@@ -29,16 +30,20 @@ const About = () => {
   ];
 
   return (
-    <div
-      className="AboutUs"
-      style={{
-        minHeight: '100vh',
-        background: '#000000',
-        color: '#ffffff',
-        padding: '40px 20px'
-      }}
-    >
-      <Container>
+  <div
+    className="AboutUs"
+    style={{
+      minHeight: '100vh',
+      background: '#000000',
+      color: '#ffffff'
+    }}
+  >
+    <Navbar
+      currentPage="about"
+      setCurrentPage={() => {}}
+    />
+
+    <Container style={{ padding: '40px 20px' }}>
 
         <Row className="justify-content-center text-center mb-4">
           <Col lg={8}>
