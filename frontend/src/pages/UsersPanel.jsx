@@ -540,6 +540,25 @@ function UsersPanel() {
 
                 </div>
 
+                {editingUser && (
+
+                  <div className="form-group">
+
+                    <label>{t.users.password}</label>
+
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder={t.users.passwordEditPlaceholder}
+                      autoComplete="new-password"
+                    />
+
+                  </div>
+
+                )}
+
                 <div className="form-group">
 
                   <label>

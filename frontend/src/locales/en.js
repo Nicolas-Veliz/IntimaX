@@ -142,6 +142,7 @@ const en = {
 
     usernamePlaceholder: 'Ex: johnsmith',
     passwordPlaceholder: 'Enter a password',
+    passwordEditPlaceholder: 'Leave blank to keep the current password',
     firstNamePlaceholder: 'Ex: JOHN',
     lastNamePlaceholder: 'Ex: SMITH',
     dniPlaceholder: 'Ex: XX.XX.XX',

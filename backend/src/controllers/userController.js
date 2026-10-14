@@ -70,14 +70,21 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { first_name, last_name, phone, address, shift, is_active, role } = req.body;
+    const { first_name, last_name, phone, address, shift, is_active, role, password } = req.body;
     const normalizedRole = normalizeRole(role);
+    let updateFields = 'first_name = ?, last_name = ?, phone = ?, address = ?, shift = ?, is_active = ?, role = ?';
+    const updateValues = [first_name, last_name, phone, address, shift, is_active, normalizedRole];
+
+    if (typeof password === 'string' && password.length > 0) {
+      updateFields += ', password = ?';
+      updateValues.push(await bcrypt.hash(password, 10));
+    }
+
+    updateValues.push(id);
     
     await pool.execute(
-      `UPDATE users 
-       SET first_name = ?, last_name = ?, phone = ?, address = ?, shift = ?, is_active = ?, role = ?
-       WHERE id = ?`,
-      [first_name, last_name, phone, address, shift, is_active, normalizedRole, id]
+      `UPDATE users SET ${updateFields} WHERE id = ?`,
+      updateValues
     );
     
     res.json({ message: 'Usuario actualizado' });
@@ -86,21 +93,21 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Desactivar usuario sin perder su historial de actividad
+// Eliminar usuario definitivamente
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     
     const [result] = await pool.execute(
-      'UPDATE users SET is_active = FALSE WHERE id = ? AND is_active = TRUE',
+      'DELETE FROM users WHERE id = ?',
       [id]
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Usuario no encontrado o ya desactivado' });
+      return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    res.json({ message: 'Usuario desactivado' });
+    res.json({ message: 'Usuario eliminado correctamente' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -138,13 +145,16 @@ export const getActivityReport = async (req, res) => {
     
     let query = `
       SELECT 
-        u.id, u.first_name, u.last_name, u.dni, u.shift,
+        u.id,
+        COALESCE(u.first_name, 'Usuario eliminado') AS first_name,
+        COALESCE(u.last_name, '') AS last_name,
+        u.dni, u.shift,
         al.action, al.timestamp, al.session_duration,
         DATE(al.timestamp) as date,
         TIME(al.timestamp) as time
       FROM activity_logs al
-      JOIN users u ON al.user_id = u.id
-      WHERE u.role IN ('admin', 'user', 'receptionist', 'supervisor')
+      LEFT JOIN users u ON al.user_id = u.id
+      WHERE (u.id IS NULL OR u.role IN ('admin', 'user', 'receptionist', 'supervisor'))
     `;
     const params = [];
     

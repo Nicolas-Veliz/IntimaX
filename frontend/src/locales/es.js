@@ -137,6 +137,7 @@ const es = {
 
     usernamePlaceholder: 'Ej: juanperez',
     passwordPlaceholder: 'Ingrese una contraseña',
+    passwordEditPlaceholder: 'Dejá vacío para conservar la contraseña actual',
     firstNamePlaceholder: 'Ej: JUAN',
     lastNamePlaceholder: 'Ej: PÉREZ',
     dniPlaceholder: 'Ej: XX.XX.XX',

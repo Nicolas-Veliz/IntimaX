@@ -5,6 +5,7 @@ describe('CP-04 - Modificación de usuario', () => {
   const usuarioBase = {
     usuario: `edit_${timestamp}`,
     password: 'Password123!',
+    nuevaPassword: 'NuevaPassword456!',
     nombre: 'Carlos',
     apellido: 'Pérez',
     dni: `${Math.floor(10000000 + Math.random() * 90000000)}`,
@@ -20,7 +21,9 @@ describe('CP-04 - Modificación de usuario', () => {
       cy.visit('/login');
 
       // Obtener las credenciales desde cypress.env.json
-      cy.env(['username', 'password']).then(({ username, password }) => {
+      cy.env(['adminUser', 'adminPassword']).then((env) => {
+        const username = typeof env?.adminUser === 'string' ? env.adminUser : 'admin';
+        const password = typeof env?.adminPassword === 'string' ? env.adminPassword : 'admin123';
 
         cy.get('[data-cy="username"]')
           .type(username);
@@ -46,7 +49,7 @@ describe('CP-04 - Modificación de usuario', () => {
     // Crear un usuario exclusivo para esta prueba
     // ---------------------------------------------------------
 
-    cy.contains(/new|add|create/i).click();
+    cy.contains(/nuevo|new|add|crear|create/i).click();
 
     cy.get('input').eq(0).type(usuarioBase.usuario);
     cy.get('input[type="password"]').type(usuarioBase.password, { log: false });
@@ -56,7 +59,7 @@ describe('CP-04 - Modificación de usuario', () => {
     cy.get('input').eq(5).type(usuarioBase.telefono);
     cy.get('input').eq(6).type(usuarioBase.direccion);
 
-    cy.contains('button', /save|submit|create|add/i).click();
+    cy.contains('button', /guardar|save|submit|crear|create|add/i).click();
 
     // Comprobar que fue creado
     cy.contains(usuarioBase.dni, { timeout: 8000 })
@@ -107,17 +110,32 @@ describe('CP-04 - Modificación de usuario', () => {
       .clear()
       .type('1122334455');
 
+    cy.get('input[name="password"]')
+      .type(usuarioBase.nuevaPassword, { log: false });
+
 
     // Guardar las modificaciones
-    cy.contains('button', /save/i).click();
+    cy.contains('button', /guardar|save/i).click();
 
-    cy.wait('@updateUser');
+    cy.wait('@updateUser')
+      .its('request.body.password')
+      .should('eq', usuarioBase.nuevaPassword);
     cy.wait('@getUsers');
 
 
     // Verificar que la modificación se reflejó
     cy.contains('Carlos Alberto', { timeout: 8000 })
       .should('be.visible');
+
+    cy.request({
+      method: 'POST',
+      url: 'http://localhost:3000/api/auth/login',
+      body: {
+        username: usuarioBase.usuario,
+        password: usuarioBase.nuevaPassword
+      },
+      failOnStatusCode: false
+    }).its('status').should('eq', 200);
 
   });
 
