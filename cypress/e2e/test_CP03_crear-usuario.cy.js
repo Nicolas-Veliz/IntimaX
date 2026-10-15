@@ -41,23 +41,27 @@ describe('CP-03 - Creación de usuario', () => {
 
   it('Debe crear un usuario ingresando todos los campos requeridos', () => {
 
-    // Abrir el formulario para crear un usuario
-    cy.contains(/new|add|create/i).click();
+    cy.intercept('POST', '**/api/users').as('createUser');
 
-    // Completar los datos del nuevo usuario
-    cy.get('input').eq(0).type(usuarioBase.usuario);
-    cy.get('input[type="password"]').type(usuarioBase.password, { log: false });
-    cy.get('input').eq(2).type(usuarioBase.nombre);
-    cy.get('input').eq(3).type(usuarioBase.apellido);
-    cy.get('input').eq(4).type(usuarioBase.dni);
-    cy.get('input').eq(5).type(usuarioBase.telefono);
-    cy.get('input').eq(6).type(usuarioBase.direccion);
+    cy.get('form.abm-form').within(() => {
+      cy.get('input[name="username"]').type(usuarioBase.usuario);
+      cy.get('input[name="password"]').type(usuarioBase.password, { log: false });
+      cy.get('input[name="first_name"]').type(usuarioBase.nombre);
+      cy.get('input[name="last_name"]').type(usuarioBase.apellido);
+      cy.get('input[name="dni"]').type(usuarioBase.dni);
+      cy.get('input[name="phone"]').type(usuarioBase.telefono);
+      cy.get('input[name="address"]').type(usuarioBase.direccion);
 
-    // Guardar el usuario
-    cy.contains('button', /save|submit|create|add/i).click();
+      cy.get('button[type="submit"]').click();
+    });
+
+    cy.wait('@createUser')
+      .its('response.statusCode')
+      .should('eq', 201);
 
     // Verificar que el usuario haya sido creado
-    cy.contains(usuarioBase.dni, { timeout: 8000 })
+    cy.get('.users-custom-table')
+      .contains('td', usuarioBase.dni, { timeout: 8000 })
       .should('be.visible');
   });
 
