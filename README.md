@@ -85,31 +85,48 @@ Cypress se encuentra incluido como dependencia de desarrollo del proyecto.
 
 # ▶️ Ejecución del sistema
 
-Para utilizar IntimaX es necesario ejecutar el backend y el frontend.
+Para utilizar IntimaX, ejecuta el backend y el frontend en terminales separadas.
 
-## Backend
+## Desarrollo local
 
-Desde la carpeta backend:
+En PowerShell, inicia el backend desde `backend`. El bypass es opcional y solo desactiva los límites de intentos de inicio de sesión para pruebas locales; no omite la validación de credenciales.
 
-bash
+```powershell
+$env:NODE_ENV = "development"
+$env:DISABLE_LOGIN_RATE_LIMIT = "true"
+cd backend
 npm run dev
+```
 
+En otra terminal, inicia el frontend:
 
-## Frontend
-
-Desde la carpeta frontend:
-
-bash
+```powershell
+cd frontend
 npm run dev
+```
 
+El frontend de desarrollo estará disponible en `http://localhost:5173`.
 
-Una vez iniciado el frontend, la aplicación estará disponible normalmente en:
+## Producción
 
-text
-http://localhost:5173
+En PowerShell, inicia el backend en modo producción desde `backend`. En este modo el bypass queda desactivado y se conservan los límites de intentos.
 
+```powershell
+$env:NODE_ENV = "production"
+$env:DISABLE_LOGIN_RATE_LIMIT = "false"
+cd backend
+npm start
+```
 
-El backend se ejecuta localmente en el puerto configurado por el proyecto.
+En otra terminal, genera y sirve la compilación de producción del frontend:
+
+```powershell
+cd frontend
+npm run build
+npm run preview
+```
+
+La vista previa de Vite estará disponible normalmente en `http://localhost:4173`. Si el backend rechaza las solicitudes por CORS, agrega ese origen a `ALLOWED_ORIGINS` en la configuración del backend. `vite preview` sirve la compilación para verificación local; para desplegar en producción, publica los archivos generados en `frontend/dist` en el servidor web elegido.
 
 ---
 
@@ -186,7 +203,7 @@ IntimaX/
 │       ├── commands.js
 │       └── e2e.js
 ├── cypress.config.js
-├── cypress.env.json     # Archivo local, no se sube a Git
+├── cypress.env.json     # Archivo local, no se sube a Git (está incluido en .gitignore)
 ├── package.json
 └── .gitignore
 

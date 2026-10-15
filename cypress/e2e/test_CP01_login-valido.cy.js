@@ -36,7 +36,7 @@ describe('Pruebas E2E - IntimaX', () => {
         cy.url()
             .should('eq', 'http://localhost:5173/')
 
-        cy.contains('ROOMS')
+        cy.contains('HABITACIONES')
             .should('be.visible')
 
     })

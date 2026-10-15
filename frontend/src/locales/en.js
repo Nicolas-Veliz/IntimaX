@@ -25,6 +25,7 @@ const en = {
     login: 'LOGIN',
     loggingIn: 'Logging in...',
     invalidCredentials: 'Incorrect username or password',
+    tooManyAttempts: 'Too many attempts. Please try again in 10 minutes.',
     ourClients: 'Our Clients',
     previousClient: 'Previous client',
     nextClient: 'Next client',

@@ -37,7 +37,11 @@ function Login() {
             navigate('/');
 
         } catch (err) {
-            setError(t.login.invalidCredentials);
+            setError(
+                err.response?.status === 429
+                    ? t.login.tooManyAttempts
+                    : t.login.invalidCredentials
+            );
             setLoading(false);
         }
     };

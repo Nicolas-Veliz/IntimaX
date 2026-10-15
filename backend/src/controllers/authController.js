@@ -5,7 +5,10 @@ import jwt from 'jsonwebtoken';
 // simple in-memory failed attempts tracker (reset on restart)
 const failedAttempts = {};
 const LOCK_THRESHOLD = 5;
-const LOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const LOCK_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+export const isLoginRateLimitDisabled = () =>
+  process.env.NODE_ENV !== 'production' &&
+  process.env.DISABLE_LOGIN_RATE_LIMIT === 'true';
 
 // Modificar el login para registrar actividad
 export const login = async (req, res) => {
@@ -15,8 +18,11 @@ export const login = async (req, res) => {
     const normalizedUsername = usernameInput;
 
     // Prevent brute-force per-username
-    if (failedAttempts[normalizedUsername] && failedAttempts[normalizedUsername].lockedUntil && Date.now() < failedAttempts[normalizedUsername].lockedUntil) {
-      return res.status(429).json({ message: 'Cuenta temporalmente bloqueada. Intente más tarde.' });
+    if (!isLoginRateLimitDisabled() &&
+      failedAttempts[normalizedUsername] &&
+      failedAttempts[normalizedUsername].lockedUntil &&
+      Date.now() < failedAttempts[normalizedUsername].lockedUntil) {
+      return res.status(429).json({ message: 'Demasiados intentos. Intente nuevamente en 10 minutos.' });
     }
 
     const [users] = await pool.execute(
@@ -25,10 +31,12 @@ export const login = async (req, res) => {
     );
 
     if (users.length === 0) {
-      failedAttempts[normalizedUsername] = failedAttempts[normalizedUsername] || { count: 0 };
-      failedAttempts[normalizedUsername].count = (failedAttempts[normalizedUsername].count || 0) + 1;
-      if (failedAttempts[normalizedUsername].count >= LOCK_THRESHOLD) {
-        failedAttempts[normalizedUsername].lockedUntil = Date.now() + LOCK_DURATION_MS;
+      if (!isLoginRateLimitDisabled()) {
+        failedAttempts[normalizedUsername] = failedAttempts[normalizedUsername] || { count: 0 };
+        failedAttempts[normalizedUsername].count = (failedAttempts[normalizedUsername].count || 0) + 1;
+        if (failedAttempts[normalizedUsername].count >= LOCK_THRESHOLD) {
+          failedAttempts[normalizedUsername].lockedUntil = Date.now() + LOCK_DURATION_MS;
+        }
       }
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
@@ -51,10 +59,12 @@ export const login = async (req, res) => {
     }
 
     if (!isValidPassword) {
-      failedAttempts[normalizedUsername] = failedAttempts[normalizedUsername] || { count: 0 };
-      failedAttempts[normalizedUsername].count = (failedAttempts[normalizedUsername].count || 0) + 1;
-      if (failedAttempts[normalizedUsername].count >= LOCK_THRESHOLD) {
-        failedAttempts[normalizedUsername].lockedUntil = Date.now() + LOCK_DURATION_MS;
+      if (!isLoginRateLimitDisabled()) {
+        failedAttempts[normalizedUsername] = failedAttempts[normalizedUsername] || { count: 0 };
+        failedAttempts[normalizedUsername].count = (failedAttempts[normalizedUsername].count || 0) + 1;
+        if (failedAttempts[normalizedUsername].count >= LOCK_THRESHOLD) {
+          failedAttempts[normalizedUsername].lockedUntil = Date.now() + LOCK_DURATION_MS;
+        }
       }
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
