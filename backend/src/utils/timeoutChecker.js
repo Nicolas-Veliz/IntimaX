@@ -8,7 +8,7 @@ export const checkTimeouts = async (io) => {
   try {
     // Buscar turnos activos que ya pasaron su hora de finalización
     const [expiredShifts] = await pool.execute(`
-      SELECT s.*, r.room_number, r.cleaning_time_minutes
+      SELECT s.*, r.room_number, r.room_type, r.cleaning_time_minutes
       FROM shifts s
       JOIN rooms r ON s.room_id = r.id
       WHERE s.status = 'active' 
@@ -22,21 +22,25 @@ export const checkTimeouts = async (io) => {
     console.log(`⏰ Se encontraron ${expiredShifts.length} turnos expirados`);
     
     for (const shift of expiredShifts) {
-      // Calcular tiempo de limpieza
-      const cleaningMinutes = shift.cleaning_time_minutes || 20;
-      const cleaningEnd = new Date();
-      cleaningEnd.setMinutes(cleaningEnd.getMinutes() + cleaningMinutes);
+      const cleaningMinutes = 10;
       
       // Actualizar estado del turno a limpieza
       await pool.execute(
         `UPDATE shifts 
-         SET status = 'cleaning', 
-             cleaning_start = NOW(), 
-             cleaning_end = ?,
+          SET status = 'cleaning',
+             cleaned_by = NULL,
+             cleaning_start = NOW(),
+             cleaning_end = DATE_ADD(NOW(), INTERVAL 10 MINUTE),
              actual_end_time = NOW()
          WHERE id = ?`,
-        [cleaningEnd, shift.id]
+        [shift.id]
       );
+
+      const [cleaningWindow] = await pool.execute(
+        'SELECT cleaning_end FROM shifts WHERE id = ?',
+        [shift.id]
+      );
+      const cleaningEnd = cleaningWindow[0].cleaning_end;
       
       // Actualizar estado de la habitación
       await pool.execute(
@@ -50,13 +54,18 @@ export const checkTimeouts = async (io) => {
           shift_id: shift.id,
           room_id: shift.room_id,
           room_number: shift.room_number,
+          room_type: shift.room_type,
+          shift_price: shift.price,
+          cleaning_end: cleaningEnd,
           message: `El turno de la habitación ${shift.room_number} ha expirado`
         });
         
         io.to('reception').emit('room_needs_cleaning', {
           room_id: shift.room_id,
+          shift_id: shift.id,
           room_number: shift.room_number,
-          cleaning_minutes: cleaningMinutes
+          cleaning_minutes: cleaningMinutes,
+          cleaning_end: cleaningEnd
         });
       }
       

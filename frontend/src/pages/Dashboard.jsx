@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import { useAuth } from '../contexts/AuthContext';
 
-import { getRooms, createRoom, updateRoom, deleteRoom, createShift, registerPayment, markCleaned, extendShift, getTodayMetrics, getDailyMetricsReport, getUsers, createUser, updateUser, deleteUser } from '../services/api';
+import { getRooms, createRoom, updateRoom, deleteRoom, createShift, registerPayment, markCleaned, assignCleaner, getCleaningStaff, extendShift, getTodayMetrics, getDailyMetricsReport, getUsers, createUser, updateUser, deleteUser, getShiftConsumption } from '../services/api';
 
 import io from 'socket.io-client';
 
@@ -36,15 +36,19 @@ function Dashboard() {
 
   const [currentPage, setCurrentPage] = useState('rooms');
 
-  const [cleaningCountdowns, setCleaningCountdowns] = useState({});
-
   const [amenitiesRoom, setAmenitiesRoom] = useState(null);
 
-  const cleaningTimers = useRef({});
+  const shiftAlertAudio = useRef(null);
+
+  const alertedShiftIds = useRef(new Set());
+
+  const ticketedShiftIds = useRef(new Set());
 
   const { user, logout } = useAuth();
 
   const [showAmenities, setShowAmenities] = useState(false);
+
+  const [cleaningStaff, setCleaningStaff] = useState([]);
 
   const [users, setUsers] = useState([]);
 
@@ -76,13 +80,15 @@ function Dashboard() {
 
     status: 'available',
 
-    cleaning_time_minutes: 20
+    cleaning_time_minutes: 10
 
   });
 
   const [roomForCheckout, setRoomForCheckout] = useState(null);
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const [shiftTicket, setShiftTicket] = useState(null);
 
   const [roomForInitialPayment, setRoomForInitialPayment] = useState(null);
 
@@ -158,7 +164,9 @@ function Dashboard() {
 
       receptionist: t.users.receptionist,
 
-      user: t.users.userRole
+      user: t.users.userRole,
+
+      cleaning: t.users.cleaning
 
     };
 
@@ -177,6 +185,12 @@ function Dashboard() {
     if (currentPage === 'reports') {
 
       loadDailyReports();
+
+    }
+
+    if (currentPage === 'rooms') {
+
+      loadCleaningStaff();
 
     }
 
@@ -212,9 +226,41 @@ function Dashboard() {
 
     });
 
-    socket.on('room_needs_cleaning', () => {
+    socket.on('shift_expired', (event) => {
 
       loadRooms();
+
+      loadMetrics();
+
+      playShiftEndAlert(event.shift_id);
+
+      showShiftTicket({
+
+        id: event.room_id,
+
+        shift_id: event.shift_id,
+
+        room_number: event.room_number,
+
+        room_type: event.room_type,
+
+        shift_price: event.shift_price
+
+      }).catch((error) => {
+
+        console.error('No se pudo preparar el ticket del turno expirado:', error);
+
+      });
+
+      addNotification(event.message || tx('Turno finalizado', 'Shift finished'), 'warning');
+
+    });
+
+    socket.on('room_needs_cleaning', (event) => {
+
+      loadRooms();
+
+      if (event?.shift_id) playShiftEndAlert(event.shift_id);
 
       addNotification(tx('🧹 Habitación necesita limpieza', '🧹 Room needs cleaning'), 'warning');
 
@@ -230,23 +276,70 @@ function Dashboard() {
 
     });
 
+    socket.on('cleaner_assigned', loadRooms);
+
     return () => {
 
       clearInterval(timer);
-
-      Object.values(cleaningTimers.current).forEach(clearInterval);
 
       socket.off('shift_created');
 
       socket.off('shift_extended');
 
+      socket.off('shift_expired');
+
       socket.off('room_needs_cleaning');
 
       socket.off('room_cleaned');
 
+      socket.off('cleaner_assigned');
+
+      window.removeEventListener('pointerdown', unlockShiftEndAlert);
+
+      window.removeEventListener('keydown', unlockShiftEndAlert);
+
     };
 
   }, [language]);
+
+  useEffect(() => {
+
+    window.addEventListener('pointerdown', unlockShiftEndAlert, { once: true });
+
+    window.addEventListener('keydown', unlockShiftEndAlert, { once: true });
+
+    return () => {
+
+      window.removeEventListener('pointerdown', unlockShiftEndAlert);
+
+      window.removeEventListener('keydown', unlockShiftEndAlert);
+
+    };
+
+  }, []);
+
+  useEffect(() => {
+
+    rooms.forEach((room) => {
+
+      if (
+        room.status === 'occupied' &&
+        room.shift_id &&
+        room.end_time &&
+        new Date(room.end_time) <= currentTime
+      ) {
+        playShiftEndAlert(room.shift_id);
+      }
+
+    });
+
+  }, [rooms, currentTime]);
+
+  useEffect(() => () => {
+
+    shiftAlertAudio.current?.close().catch(() => {});
+
+  }, []);
 
   const resetUserForm = () => {
 
@@ -448,11 +541,45 @@ function Dashboard() {
 
       const data = await getRooms();
 
-      setRooms(data);
+      const loadedAt = Date.now();
+
+      setRooms(data.map((room) => {
+
+        const remainingSeconds = room.cleaning_seconds_remaining == null
+          ? null
+          : Number(room.cleaning_seconds_remaining);
+
+        return {
+
+          ...room,
+
+          cleaning_deadline_client_ms: Number.isFinite(remainingSeconds)
+            ? loadedAt + (Math.max(0, remainingSeconds) + 1) * 1000
+            : null
+
+        };
+
+      }));
 
     } catch (error) {
 
       console.error('Error loading rooms:', error);
+
+    }
+
+  };
+
+  const loadCleaningStaff = async () => {
+
+    try {
+
+      setCleaningStaff(await getCleaningStaff());
+
+    } catch (error) {
+
+      console.error('Error loading cleaning staff:', error);
+
+      setCleaningStaff([]);
 
     }
 
@@ -476,7 +603,7 @@ function Dashboard() {
 
       status: 'available',
 
-      cleaning_time_minutes: 20
+      cleaning_time_minutes: 10
 
     });
 
@@ -509,7 +636,7 @@ function Dashboard() {
 
         price_per_extra_hour: Number(roomForm.price_per_extra_hour || 0),
 
-        cleaning_time_minutes: Number(roomForm.cleaning_time_minutes || 20)
+        cleaning_time_minutes: 10
 
       };
 
@@ -558,7 +685,7 @@ function Dashboard() {
 
       status: room.status || 'available',
 
-      cleaning_time_minutes: room.cleaning_time_minutes || 20
+      cleaning_time_minutes: 10
 
     });
 
@@ -621,6 +748,8 @@ function Dashboard() {
 
     // Mostrar modal de pago ANTES de iniciar el turno
 
+    unlockShiftEndAlert();
+
     setRoomForInitialPayment(selectedRoom);
 
     setDurationForPayment(duration);
@@ -633,7 +762,15 @@ function Dashboard() {
 
     const extendedEnd = new Date(currentTime);
 
-    if (currentTime.getHours() >= 22) {
+    const currentHour = currentTime.getHours();
+
+    if (currentHour >= 8 && currentHour < 22) {
+
+      return 10;
+
+    }
+
+    if (currentHour >= 22) {
 
       extendedEnd.setDate(extendedEnd.getDate() + 1);
 
@@ -642,6 +779,18 @@ function Dashboard() {
     extendedEnd.setHours(8, 0, 0, 0);
 
     return (extendedEnd - currentTime) / 3600000;
+
+  };
+
+  const getExtendedShiftPrice = (room) => {
+
+    const configuredPrice = Number(room?.extended_price || 0);
+
+    if (configuredPrice > 0) return configuredPrice;
+
+    const extraHours = Math.ceil(Math.max(0, getExtendedDuration() - 2));
+
+    return Number(room?.base_price || 0) + extraHours * Number(room?.price_per_extra_hour || 0);
 
   };
 
@@ -675,6 +824,149 @@ function Dashboard() {
 
   };
 
+  const unlockShiftEndAlert = () => {
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    if (!shiftAlertAudio.current || shiftAlertAudio.current.state === 'closed') {
+      shiftAlertAudio.current = new AudioContextClass();
+    }
+
+    if (shiftAlertAudio.current.state === 'suspended') {
+      shiftAlertAudio.current.resume().catch(() => {});
+    }
+
+  };
+
+  const playShiftEndAlert = (shiftId) => {
+
+    if (!shiftId || alertedShiftIds.current.has(shiftId)) return;
+
+    alertedShiftIds.current.add(shiftId);
+
+    try {
+
+      unlockShiftEndAlert();
+
+      const audioContext = shiftAlertAudio.current;
+
+      if (!audioContext) return;
+
+      const playTones = () => {
+
+        [880, 660, 880].forEach((frequency, index) => {
+
+          const startTime = audioContext.currentTime + index * 0.2;
+
+          const oscillator = audioContext.createOscillator();
+
+          const gain = audioContext.createGain();
+
+          oscillator.frequency.setValueAtTime(frequency, startTime);
+
+          gain.gain.setValueAtTime(0.001, startTime);
+
+          gain.gain.exponentialRampToValueAtTime(0.16, startTime + 0.02);
+
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.16);
+
+          oscillator.connect(gain);
+
+          gain.connect(audioContext.destination);
+
+          oscillator.start(startTime);
+
+          oscillator.stop(startTime + 0.17);
+
+        });
+
+      };
+
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().then(playTones).catch(() => {});
+      } else {
+        playTones();
+      }
+
+    } catch (error) {
+
+      console.warn('No se pudo reproducir la alerta de fin de turno:', error);
+
+    }
+
+  };
+
+  const showShiftTicket = async (room) => {
+
+    if (!room?.shift_id || ticketedShiftIds.current.has(room.shift_id)) return;
+
+    ticketedShiftIds.current.add(room.shift_id);
+
+    let items = [];
+
+    try {
+
+      items = await getShiftConsumption(room.shift_id);
+
+    } catch (error) {
+
+      console.error('No se pudo cargar el detalle de consumos del turno:', error);
+
+      showAlert(t.dashboard.ticketItemsError, 'warning');
+
+    }
+
+    const total = Number(room.shift_price ?? room.base_price ?? 0);
+
+    const productsTotal = items.reduce(
+      (sum, item) => sum + Number(item.price_at_time || 0) * Number(item.quantity || 0),
+      0
+    );
+
+    setShiftTicket({
+
+      room,
+
+      roomCharge: Math.max(0, total - productsTotal),
+
+      items,
+
+      total,
+
+      date: new Date().toLocaleString(locale),
+
+    });
+
+    playShiftEndAlert(room.shift_id);
+
+  };
+
+  const finishShiftAndShowTicket = async (room, paymentMethod) => {
+
+    const result = await registerPayment(room.shift_id, paymentMethod);
+
+    const completedRoom = {
+
+      ...room,
+
+      ...result.shift,
+
+      shift_id: room.shift_id,
+
+      shift_price: result.shift?.price ?? room.shift_price
+
+    };
+
+    await showShiftTicket(completedRoom);
+
+    await Promise.all([loadRooms(), loadMetrics()]);
+
+  };
+
+  const closeShiftTicket = () => setShiftTicket(null);
+
   const handleCheckout = async (room) => {
 
     const confirmed = await confirmAction(
@@ -697,9 +989,7 @@ function Dashboard() {
 
       // Marcar como completado sin cambiar el método de pago (ya está registrado)
 
-      await registerPayment(room.shift_id, room.payment_method || 'cash');
-
-      loadRooms();
+      await finishShiftAndShowTicket(room, room.payment_method || 'cash');
 
       addNotification(tx('✋ Turno detenido', '✋ Shift stopped'), 'success');
 
@@ -718,6 +1008,8 @@ function Dashboard() {
     if (roomForInitialPayment) {
 
       try {
+
+        unlockShiftEndAlert();
 
         await createShift(roomForInitialPayment.id, durationForPayment);
 
@@ -743,9 +1035,7 @@ function Dashboard() {
 
       try {
 
-        await registerPayment(roomForCheckout.shift_id, paymentMethod);
-
-        loadRooms();
+        await finishShiftAndShowTicket(roomForCheckout, paymentMethod);
 
         addNotification(tx('💰 Pago registrado', '💰 Payment registered'), 'success');
 
@@ -765,17 +1055,55 @@ function Dashboard() {
 
   const handleClean = async (room) => {
 
+    if (!room.cleaned_by) {
+
+      showAlert(t.dashboard.cleaningNotAssigned, 'warning');
+
+      return;
+
+    }
+
+    if (!room.cleaning_deadline_client_ms || room.cleaning_deadline_client_ms > Date.now()) {
+
+      showAlert(t.dashboard.cleaningWait, 'warning');
+
+      return;
+
+    }
+
     try {
 
       await markCleaned(room.id);
 
-      loadRooms();
+      await loadRooms();
 
       addNotification(tx('✨ Habitación limpia', '✨ Room cleaned'), 'success');
 
     } catch (error) {
 
-      showAlert(tx('Error al marcar limpieza', 'Error marking room as cleaned'), 'error');
+      showAlert(`${tx('Error al marcar limpieza', 'Error marking room as cleaned')}: ${error.response?.data?.message || error.message}`, 'error');
+
+    }
+
+  };
+
+  const handleAssignCleaner = async (room, cleanerId) => {
+
+    if (!cleanerId || !room.shift_id) return;
+
+    try {
+
+      await assignCleaner(room.shift_id, Number(cleanerId));
+
+      await loadRooms();
+
+      addNotification(tx('Empleada asignada a la habitación', 'Cleaner assigned to room'), 'success');
+
+    } catch (error) {
+
+      showAlert(`${tx('No se pudo asignar la habitación', 'Could not assign the room')}: ${error.response?.data?.message || error.message}`, 'error');
+
+      await Promise.all([loadRooms(), loadCleaningStaff()]);
 
     }
 
@@ -793,19 +1121,13 @@ function Dashboard() {
 
     if (!confirmCleaning) return;
 
-    setRooms((prevRooms) =>
+    try {
 
-      prevRooms.map((r) =>
+      await finishShiftAndShowTicket(room, room.payment_method || 'cash');
 
-        r.id === room.id ? { ...r, status: 'cleaning' } : r
+    } catch (error) {
 
-      )
-
-    );
-
-    if (!cleaningTimers.current[room.id]) {
-
-      startCleaningCountdown(room);
+      showAlert(`${tx('Error al finalizar el turno', 'Error finishing the shift')}: ${error.response?.data?.message || error.message}`, 'error');
 
     }
 
@@ -842,78 +1164,6 @@ function Dashboard() {
     setAmenitiesRoom((prev) => prev ? { ...prev, shift_price: total } : prev);
 
     loadRooms();
-
-  };
-
-  const startCleaningCountdown = (room) => {
-
-    setCleaningCountdowns((prev) => ({ ...prev, [room.id]: 30 }));
-
-    const intervalId = setInterval(() => {
-
-      setCleaningCountdowns((prev) => {
-
-        const remaining = prev[room.id];
-
-        if (!remaining || remaining <= 1) {
-
-          clearInterval(intervalId);
-
-          delete cleaningTimers.current[room.id];
-
-          const next = { ...prev };
-
-          delete next[room.id];
-
-          finishCleaning(room);
-
-          return next;
-
-        }
-
-        return { ...prev, [room.id]: remaining - 1 };
-
-      });
-
-    }, 1000);
-
-    cleaningTimers.current[room.id] = intervalId;
-
-  };
-
-  const finishCleaning = async (room) => {
-
-    const confirmDone = await confirmAction(
-
-      `${tx('Habitación', 'Room')} ${room.room_number} ${tx('limpia. ¿Poner en disponible?', 'is clean. Set as available?')}`,
-
-      { title: tx('Limpieza finalizada', 'Cleaning finished'), confirmButtonText: tx('Poner disponible', 'Set as available') }
-
-    );
-
-    if (!confirmDone) {
-
-      addNotification(`${tx('Habitación', 'Room')} ${room.room_number} ${tx('sigue en limpieza', 'is still being cleaned')}`, 'warning');
-
-      return;
-
-    }
-
-    try {
-
-      await markCleaned(room.id);
-
-      loadRooms();
-
-      addNotification(`✨ ${tx('Habitación', 'Room')} ${room.room_number} ${tx('disponible', 'available')}`, 'success');
-
-    } catch (error) {
-
-      console.error(error);
-
-      addNotification(tx('Error al poner la habitación disponible', 'Error setting room as available'), 'error');
-
-    }
 
   };
 
@@ -974,6 +1224,91 @@ function Dashboard() {
     const number = Number(value || 0);
 
     return `$${number.toLocaleString(locale)}`;
+
+  };
+
+  const handlePrintTicket = () => {
+
+    const printWindow = window.open('', '_blank', 'width=480,height=720');
+
+    if (!printWindow) {
+
+      showAlert(tx('El navegador bloqueó la ventana de impresión.', 'The browser blocked the print window.'), 'warning');
+
+      return;
+
+    }
+
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[character]);
+
+    const itemRows = shiftTicket.items.map((item) => `
+      <tr>
+        <td>${escapeHtml(item.name)} × ${Number(item.quantity || 0)}</td>
+        <td>${escapeHtml(formatCurrency(Number(item.price_at_time || 0) * Number(item.quantity || 0)))}</td>
+      </tr>
+    `).join('');
+
+    printWindow.onafterprint = () => printWindow.close();
+    printWindow.document.open();
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="${language}">
+        <head>
+          <meta charset="UTF-8" />
+          <title>${escapeHtml(t.dashboard.shiftTicket)}</title>
+          <style>
+            @page { size: 100mm 150mm; margin: 3mm; }
+            * { box-sizing: border-box; }
+            html, body { width: 94mm; margin: 0; padding: 0; }
+            body { color: #111; font: 10pt/1.25 Arial, sans-serif; }
+            .ticket { width: 100%; max-width: 94mm; margin: 0 auto; }
+            header { text-align: center; border-bottom: 1px dashed #111; padding-bottom: 6px; margin-bottom: 8px; }
+            header strong { display: block; font-size: 18pt; }
+            h1 { margin: 3px 0 0; font-size: 11pt; }
+            .meta { margin: 3px 0; font-size: 9.5pt; }
+            table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 8px 0; border-top: 1px solid #111; border-bottom: 1px solid #111; }
+            td { padding: 4px 0; vertical-align: top; }
+            td:first-child { overflow-wrap: anywhere; padding-right: 6px; }
+            td:last-child { text-align: right; white-space: nowrap; }
+            tr { break-inside: avoid; page-break-inside: avoid; }
+            .total { display: flex; justify-content: space-between; gap: 8px; border-top: 2px solid #111; padding-top: 6px; font-size: 13pt; font-weight: 700; }
+          </style>
+        </head>
+        <body>
+          <main class="ticket">
+            <header>
+              <strong>INTIMAX</strong>
+              <h1>${escapeHtml(t.dashboard.shiftTicket)}</h1>
+            </header>
+            <p class="meta">${escapeHtml(t.dashboard.room)}: ${escapeHtml(shiftTicket.room.room_number)}</p>
+            <p class="meta">${escapeHtml(t.dashboard.roomType)}: ${escapeHtml(getRoomTypeLabel(shiftTicket.room.room_type))}</p>
+            <p class="meta">${escapeHtml(t.dashboard.date)}: ${escapeHtml(shiftTicket.date)}</p>
+            <table>
+              <tbody>
+                <tr>
+                  <td>${escapeHtml(t.dashboard.roomCharge)}</td>
+                  <td>${escapeHtml(formatCurrency(shiftTicket.roomCharge))}</td>
+                </tr>
+                ${itemRows}
+              </tbody>
+            </table>
+            <div class="total">
+              <span>${escapeHtml(t.dashboard.total)}</span>
+              <span>${escapeHtml(formatCurrency(shiftTicket.total))}</span>
+            </div>
+          </main>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
 
   };
 
@@ -1083,6 +1418,10 @@ function Dashboard() {
 
                 const timeLeft = formatTimeLeft(room.end_time);
 
+                const cleaningTimeLeft = formatTimeLeft(room.cleaning_deadline_client_ms);
+
+                const cleaningComplete = cleaningTimeLeft?.expired === true;
+
                 const isOccupied = room.status === 'occupied';
 
                 const isCleaning = room.status === 'cleaning';
@@ -1177,6 +1516,41 @@ function Dashboard() {
 
                         </div>
 
+                        <div className="cleaning-assignment">
+
+                          <label htmlFor={`cleaner-${room.shift_id}`}>{t.dashboard.assignCleaner}</label>
+
+                          <select
+                            id={`cleaner-${room.shift_id}`}
+                            value={room.cleaned_by ? String(room.cleaned_by) : ''}
+                            onChange={(event) => handleAssignCleaner(room, event.target.value)}
+                            disabled={cleaningStaff.length === 0 || Boolean(room.cleaned_by)}
+                          >
+
+                            <option value="">{t.dashboard.selectCleaner}</option>
+
+                            {cleaningStaff.map((cleaner) => (
+
+                              <option key={cleaner.id} value={cleaner.id}>
+
+                                {cleaner.first_name} {cleaner.last_name}
+
+                              </option>
+
+                            ))}
+
+                          </select>
+
+                          {cleaningStaff.length === 0 && <span>{t.dashboard.noCleaningStaff}</span>}
+
+                          {room.cleaned_by && (
+
+                            <span>{t.dashboard.assignedCleaner}: {room.cleaner_first_name} {room.cleaner_last_name}</span>
+
+                          )}
+
+                        </div>
+
                         <div className="room-actions">
 
                           <button
@@ -1191,13 +1565,13 @@ function Dashboard() {
 
                             }}
 
-                            disabled={!!cleaningCountdowns[room.id]}
+                            disabled={!room.cleaned_by || !cleaningComplete}
 
                           >
 
-                            {cleaningCountdowns[room.id]
+                            {!cleaningComplete || !room.cleaned_by
 
-                              ? `${t.dashboard.cleaningInProgress} ${cleaningCountdowns[room.id]}s`
+                              ? `${t.dashboard.cleaningInProgress} ${formatTimer(cleaningTimeLeft)}`
 
                               : t.dashboard.markReady}
 
@@ -1708,6 +2082,8 @@ function Dashboard() {
 
                         <option value="admin">{t.users.admin}</option>
 
+                        <option value="cleaning">{t.users.cleaning}</option>
+
                       </select>
 
                     </div>
@@ -2042,7 +2418,7 @@ function Dashboard() {
 
             <p>{tx('Precio base', 'Base price')}: ${Number(selectedRoom.base_price || 0).toLocaleString(locale)}</p>
 
-            <p>{tx('Precio extendido', 'Extended price')}: ${Number(selectedRoom.extended_price || 0).toLocaleString(locale)}</p>
+            <p>{tx('Precio extendido', 'Extended price')}: ${getExtendedShiftPrice(selectedRoom).toLocaleString(locale)}</p>
 
             <div className="duration-selector">
 
@@ -2076,7 +2452,7 @@ function Dashboard() {
 
                 >
 
-                  {tx('EXTENDIDO', 'EXTENDED')} - ${Number(selectedRoom.extended_price || 0).toLocaleString(locale)}
+                  {tx('EXTENDIDO', 'EXTENDED')} - ${getExtendedShiftPrice(selectedRoom).toLocaleString(locale)}
 
                 </button>
 
@@ -2185,6 +2561,84 @@ function Dashboard() {
             </div>
 
           </div>
+
+        </div>
+
+      )}
+
+      {shiftTicket && (
+
+        <div className="modal-overlay shift-ticket-overlay" onClick={closeShiftTicket}>
+
+          <section className="modal-content shift-ticket-content" onClick={(event) => event.stopPropagation()}>
+
+            <div className="shift-ticket-print">
+
+              <header className="shift-ticket-header">
+
+                <strong>INTIMAX</strong>
+
+                <h2>{t.dashboard.shiftTicket}</h2>
+
+              </header>
+
+              <p>{t.dashboard.room}: {shiftTicket.room.room_number}</p>
+
+              <p>{t.dashboard.roomType}: {getRoomTypeLabel(shiftTicket.room.room_type)}</p>
+
+              <p>{t.dashboard.date}: {shiftTicket.date}</p>
+
+              <div className="shift-ticket-lines">
+
+                <div className="shift-ticket-line">
+
+                  <span>{t.dashboard.roomCharge}</span>
+
+                  <span>{formatCurrency(shiftTicket.roomCharge)}</span>
+
+                </div>
+
+                {shiftTicket.items.map((item) => (
+
+                  <div className="shift-ticket-line" key={item.id}>
+
+                    <span>{item.name} × {item.quantity}</span>
+
+                    <span>{formatCurrency(Number(item.price_at_time || 0) * Number(item.quantity || 0))}</span>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+              <div className="shift-ticket-total">
+
+                <strong>{t.dashboard.total}</strong>
+
+                <strong>{formatCurrency(shiftTicket.total)}</strong>
+
+              </div>
+
+            </div>
+
+            <div className="modal-actions shift-ticket-actions">
+
+              <button type="button" className="btn-confirm" onClick={handlePrintTicket}>
+
+                {t.dashboard.printTicket}
+
+              </button>
+
+              <button type="button" className="btn-cancel" onClick={closeShiftTicket}>
+
+                {t.dashboard.closeTicket}
+
+              </button>
+
+            </div>
+
+          </section>
 
         </div>
 

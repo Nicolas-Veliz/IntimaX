@@ -354,6 +354,50 @@
   margin-top: 5px;
 }
 
+.cleaning-assignment {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  text-align: left;
+  color: #E5E7EB;
+  font-size: 12px;
+}
+
+.cleaning-assignment label {
+  color: #E8BA6F;
+  font-weight: 700;
+}
+
+.cleaning-assignment select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid rgba(232, 186, 111, 0.35);
+  border-radius: 6px;
+  background: #111112;
+  color: #fff;
+  font: inherit;
+}
+
+.room-cleaning .btn-clean {
+  background: #000000;
+  color: #E8BA6F;
+  border: 1px solid #E8BA6F;
+  font-variant-numeric: tabular-nums;
+}
+
+.room-cleaning .btn-clean:hover:not(:disabled) {
+  background: #E8BA6F;
+  color: #000000;
+}
+
+.room-cleaning .btn-clean:disabled {
+  background: #000000;
+  color: #E8BA6F;
+  border-color: rgba(232, 186, 111, 0.55);
+  opacity: 0.8;
+}
+
 /* ========== MODAL PREMIUM (INTIMAX SYSTEM) ========== */
 .modal-overlay {
   position: fixed;
@@ -540,6 +584,58 @@
   color: #ffc800;
 }
 
+.shift-ticket-content {
+  width: min(92vw, 520px);
+  max-height: 85vh;
+  overflow-y: auto;
+  color: #E8BA6F;
+}
+
+.shift-ticket-content p,
+.shift-ticket-line {
+  color: #E8BA6F;
+}
+
+.shift-ticket-header {
+  text-align: center;
+  border-bottom: 1px dashed #9CA3AF;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.shift-ticket-header strong {
+  color: #E8BA6F;
+  font-size: 24px;
+}
+
+.shift-ticket-content .shift-ticket-header h2 {
+  font-size: 18px;
+  margin: 8px 0 0;
+}
+
+.shift-ticket-lines {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px 0;
+  margin: 16px 0;
+}
+
+.shift-ticket-line,
+.shift-ticket-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+}
+
+.shift-ticket-line span:first-child {
+  overflow-wrap: anywhere;
+}
+
+.shift-ticket-total {
+  color: #E8BA6F;
+  font-size: 18px;
+}
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {

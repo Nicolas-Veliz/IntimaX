@@ -38,7 +38,7 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
     min_stock_alert: '5',
 
-    category: 'otros'
+    category: 'comidas'
 
   });
 
@@ -182,7 +182,7 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
         min_stock_alert: '5',
 
-        category: 'otros'
+        category: 'comidas'
 
       });
 
@@ -262,13 +262,15 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
       bebidas: '🥤',
 
+      desayuno: '☕',
+
+      drugstore: '🧴',
+
       comidas: '🍕',
 
-      higiene: '🧴',
+      postres: '🍰',
 
-      entretenimiento: '🎮',
-
-      otros: '📦'
+      bebidas_con_alcohol: '🍺'
 
     };
 
@@ -282,21 +284,35 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
     const names = {
 
-      bebidas: 'Bebidas',
+      bebidas: t.amenities.drinks,
 
-      comidas: 'Comidas',
+      desayuno: t.amenities.breakfast,
 
-      higiene: 'Higiene',
+      drugstore: t.amenities.drugstore,
 
-      entretenimiento: 'Entretenimiento',
+      comidas: t.amenities.food,
 
-      otros: 'Otros'
+      postres: t.amenities.desserts,
+
+      bebidas_con_alcohol: t.amenities.alcoholicDrinks
 
     };
 
     return names[category] || category;
 
   };
+
+  const categoryOrder = ['bebidas', 'desayuno', 'drugstore', 'comidas', 'postres', 'bebidas_con_alcohol'];
+
+  const amenityCategories = [...new Set([
+    ...categoryOrder,
+    ...amenities.map((amenity) => amenity.category || 'comidas')
+  ])]
+    .map((category) => ({
+      category,
+      items: amenities.filter((amenity) => (amenity.category || 'comidas') === category)
+    }))
+    .filter((group) => group.items.length > 0);
 
 
 
@@ -433,26 +449,6 @@ function AmenityManager({ onClose, room, onConsumed }) {
         });
 
       }
-
-
-
-      openReceipt({
-
-        roomNumber: room.room_number,
-
-        roomType: room.room_type,
-
-        roomPrice: room.shift_price ?? room.base_price ?? 0,
-
-        amenityName: amenity.name,
-
-        amenityPrice: response.data.amenity_price,
-
-        total: response.data.new_total,
-
-        date: new Date().toLocaleString(locale)
-
-      });
 
 
 
@@ -650,7 +646,7 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
                   min_stock_alert: '5',
 
-                  category: 'otros'
+                  category: 'comidas'
 
                 });
 
@@ -706,37 +702,55 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
 
 
-      <div className="amenity-grid">
+      <div className="amenity-catalog">
 
-        {amenities.map((amenity) => (
+        {amenityCategories.map(({ category, items }) => (
 
-          <div key={amenity.id} className={`amenity-card ${amenity.stock <= amenity.min_stock_alert ? 'low-stock' : ''}`}>
+          <section className="amenity-category-section" key={category}>
 
-            <div className="amenity-icon">{getCategoryEmoji(amenity.category)}</div>
+            <h3 className="amenity-section-title">
 
-            <div className="amenity-info">
+              <span>{getCategoryEmoji(category)}</span>
 
-              <div className="amenity-name">{amenity.name}</div>
+              {getCategoryName(category)}
 
-              <div className="amenity-category">{getCategoryName(amenity.category)}</div>
+            </h3>
 
-              <div className="amenity-price">${Number(amenity.price || 0).toLocaleString(locale)}</div>
+            <div className="amenity-grid">
 
-              <div className={`amenity-stock ${amenity.stock <= amenity.min_stock_alert ? 'alert' : ''}`}>
+              {items.map((amenity) => (
 
-                {t.amenities.stock}: {amenity.stock} {amenity.stock <= amenity.min_stock_alert && '⚠️'}
+          <article key={amenity.id} className={`amenity-card ${amenity.stock <= amenity.min_stock_alert ? 'low-stock' : ''}`}>
+
+            <div className="amenity-card-content">
+
+              <div className="amenity-icon">{getCategoryEmoji(amenity.category)}</div>
+
+              <div className="amenity-info">
+
+                <div className="amenity-name">{amenity.name}</div>
+
+                <div className="amenity-category">{getCategoryName(amenity.category)}</div>
+
+                <div className="amenity-price">${Number(amenity.price || 0).toLocaleString(locale)}</div>
+
+                <div className={`amenity-stock ${amenity.stock <= amenity.min_stock_alert ? 'alert' : ''}`}>
+
+                  {t.amenities.stock}: {amenity.stock} {amenity.stock <= amenity.min_stock_alert && '⚠️'}
+
+                </div>
+
+                {amenity.description && (
+
+                  <div className="amenity-description">{amenity.description}</div>
+
+                )}
 
               </div>
 
-              {amenity.description && (
-
-                <div className="amenity-description">{amenity.description}</div>
-
-              )}
-
             </div>
 
-            <div className="amenity-actions">
+            <div className={`amenity-actions ${isAdmin ? 'admin' : ''}`}>
 
               <button
 
@@ -766,7 +780,13 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
             </div>
 
-          </div>
+          </article>
+
+              ))}
+
+            </div>
+
+          </section>
 
         ))}
 
@@ -894,13 +914,15 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
                     <option value="bebidas">{t.amenities.drinks}</option>
 
+                    <option value="desayuno">{t.amenities.breakfast}</option>
+
+                    <option value="drugstore">{t.amenities.drugstore}</option>
+
                     <option value="comidas">{t.amenities.food}</option>
 
-                    <option value="higiene">{t.amenities.hygiene}</option>
+                    <option value="postres">{t.amenities.desserts}</option>
 
-                    <option value="entretenimiento">{t.amenities.entertainment}</option>
-
-                    <option value="otros">{t.amenities.others}</option>
+                    <option value="bebidas_con_alcohol">{t.amenities.alcoholicDrinks}</option>
 
                   </select>
 
@@ -976,7 +998,7 @@ function AmenityManager({ onClose, room, onConsumed }) {
 
         .amenity-header h2 {
 
-          color: #fff;
+          color: #E8BA6F;
 
           margin: 0;
 
@@ -1427,6 +1449,149 @@ function AmenityManager({ onClose, room, onConsumed }) {
         }
 
 
+
+        .amenity-catalog {
+          display: flex;
+          flex-direction: column;
+          gap: 22px;
+          min-width: 0;
+        }
+
+        .amenity-category-section {
+          min-width: 0;
+        }
+
+        .amenity-category-section + .amenity-category-section {
+          margin-top: 0;
+        }
+
+        .amenity-section-title {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 0 0 12px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid rgba(232, 186, 111, 0.3);
+          color: #E8BA6F;
+          font-size: 17px;
+          font-weight: 700;
+        }
+
+        .amenity-grid {
+          grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+          gap: 14px;
+          min-width: 0;
+        }
+
+        .amenity-card {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 12px;
+          min-width: 0;
+          padding: 16px;
+          overflow: hidden;
+          background: #111112;
+          border: 1px solid rgba(232, 186, 111, 0.22);
+          border-radius: 8px;
+        }
+
+        .amenity-card.low-stock {
+          border-left: 4px solid #E8BA6F;
+        }
+
+        .amenity-card-content {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          min-width: 0;
+        }
+
+        .amenity-info {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .amenity-name {
+          color: #F3F4F6;
+          overflow-wrap: anywhere;
+        }
+
+        .amenity-category {
+          display: inline-block;
+          margin-top: 4px;
+          padding: 3px 7px;
+          border: 1px solid rgba(232, 186, 111, 0.35);
+          border-radius: 4px;
+          background: rgba(232, 186, 111, 0.1);
+          color: #E8BA6F;
+        }
+
+        .amenity-price {
+          color: #E8BA6F;
+        }
+
+        .amenity-stock,
+        .amenity-description {
+          color: #C9CDD3;
+          overflow-wrap: anywhere;
+        }
+
+        .amenity-stock.alert {
+          color: #E8BA6F;
+        }
+
+        .amenity-actions {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          align-items: stretch;
+          gap: 8px;
+          margin-top: auto;
+          min-width: 0;
+        }
+
+        .amenity-actions.admin {
+          grid-template-columns: minmax(0, 1fr) 40px 40px;
+        }
+
+        .amenity-actions .btn-add-to-room,
+        .amenity-actions .btn-edit,
+        .amenity-actions .btn-delete {
+          min-width: 0;
+          min-height: 40px;
+          padding: 8px;
+          border: 1px solid rgba(232, 186, 111, 0.4);
+          border-radius: 5px;
+          background: #080809;
+          color: #E8BA6F;
+        }
+
+        .amenity-actions .btn-add-to-room {
+          border-color: #E8BA6F;
+          background: #000;
+          font-weight: 700;
+          white-space: nowrap;
+        }
+
+        .amenity-actions .btn-edit:hover {
+          background: #E8BA6F;
+          color: #000;
+        }
+
+        .amenity-actions .btn-delete:hover {
+          background: #B11226;
+          color: #fff;
+        }
+
+        .form-group select {
+          background: #111112;
+          color: #F3F4F6;
+        }
+
+        .form-group select option {
+          background: #111112;
+          color: #F3F4F6;
+        }
 
         @media (max-width: 768px) {
 

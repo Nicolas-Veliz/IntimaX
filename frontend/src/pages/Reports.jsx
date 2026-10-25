@@ -8,7 +8,8 @@ import {
   getActivityReport,
   getDailyMetricsReport,
   getRoomUsage,
-  getTodayMetrics
+  getTodayMetrics,
+  getCleaningReport
 } from '../services/api';
 
 import { useLanguage } from '../contexts/LanguageContext';
@@ -30,6 +31,8 @@ function Reports() {
     logs: [],
     summary: []
   });
+
+  const [cleaningReport, setCleaningReport] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -66,7 +69,8 @@ function Reports() {
           reportData,
           metricsData,
           roomData,
-          activityData
+          activityData,
+          cleaningData
         ] = await Promise.all([
 
           getDailyMetricsReport(),
@@ -75,7 +79,9 @@ function Reports() {
 
           getRoomUsage(),
 
-          getActivityReport()
+          getActivityReport(),
+
+          getCleaningReport()
 
         ]);
 
@@ -102,6 +108,8 @@ function Reports() {
             summary: []
           }
         );
+
+        setCleaningReport(Array.isArray(cleaningData) ? cleaningData : []);
 
 
       } catch (err) {
@@ -1147,6 +1155,72 @@ function Reports() {
                 </div>
 
               </div>
+
+              <section style={{ ...panelStyle, marginTop: '24px' }}>
+
+                <h3 style={sectionTitleStyle}>{t.reports.cleaningReport}</h3>
+
+                <div style={{ overflowX: 'auto' }}>
+
+                  <table style={tableStyle}>
+
+                    <thead>
+
+                      <tr>
+
+                        <th style={thStyle}>{t.reports.cleaningEmployee}</th>
+
+                        <th style={thStyle}>{t.reports.cleaningRoom}</th>
+
+                        <th style={thStyle}>{t.reports.cleaningStartedAt}</th>
+
+                        <th style={thStyle}>{t.reports.cleaningFinishedAt}</th>
+
+                        <th style={thStyle}>{t.reports.cleaningDuration}</th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                      {cleaningReport.length === 0 ? (
+
+                        <tr>
+
+                          <td colSpan="5" style={emptyStyle}>{t.reports.noCleaningRecords}</td>
+
+                        </tr>
+
+                      ) : (
+
+                        cleaningReport.map((entry) => (
+
+                          <tr key={entry.shift_id} style={rowStyle}>
+
+                            <td style={tdStyle}>{entry.cleaner_name || '—'}</td>
+
+                            <td style={tdStyle}>{entry.room_number || '—'}</td>
+
+                            <td style={tdStyle}>{formatDateTime(entry.cleaning_start)}</td>
+
+                            <td style={tdStyle}>{formatDateTime(entry.cleaned_at)}</td>
+
+                            <td style={tdStyle}>{formatDuration(entry.cleaning_duration_seconds)}</td>
+
+                          </tr>
+
+                        ))
+
+                      )}
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              </section>
 
             </>
 

@@ -7,8 +7,14 @@ export const getRooms = async (req, res) => {
              s.id as shift_id, 
              s.duration_hours,
              s.end_time,
+             s.cleaning_start,
+               s.cleaning_end,
+             GREATEST(TIMESTAMPDIFF(SECOND, NOW(), s.cleaning_end), 0) AS cleaning_seconds_remaining,
+               s.cleaned_by,
              s.status as shift_status,
-             s.price as shift_price
+               s.price as shift_price,
+               cleaner.first_name AS cleaner_first_name,
+               cleaner.last_name AS cleaner_last_name
       FROM rooms r
       LEFT JOIN (
         SELECT s1.*
@@ -16,10 +22,11 @@ export const getRooms = async (req, res) => {
         INNER JOIN (
           SELECT room_id, MAX(id) AS latest_shift_id
           FROM shifts
-          WHERE status = 'active'
+          WHERE status IN ('active', 'cleaning')
           GROUP BY room_id
         ) latest ON s1.id = latest.latest_shift_id
       ) s ON r.id = s.room_id
+      LEFT JOIN users cleaner ON cleaner.id = s.cleaned_by
       ORDER BY CAST(r.room_number AS UNSIGNED), r.room_number, r.id
     `);
     res.json(rooms);
@@ -30,16 +37,16 @@ export const getRooms = async (req, res) => {
 
 export const createRoom = async (req, res) => {
   try {
-    const { room_number, room_type, base_price, extended_price = 0, price_per_extra_hour, status = 'available', cleaning_time_minutes = 20 } = req.body;
+    const { room_number, room_type, base_price, extended_price = 0, price_per_extra_hour, status = 'available' } = req.body;
     const extraHourPrice = req.user.role === 'admin' ? Number(price_per_extra_hour || 0) : 0;
 
     const [result] = await pool.execute(
       `INSERT INTO rooms (room_number, room_type, base_price, extended_price, price_per_extra_hour, status, cleaning_time_minutes)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [room_number, room_type, base_price, extended_price, extraHourPrice, status, cleaning_time_minutes]
+      [room_number, room_type, base_price, extended_price, extraHourPrice, status, 10]
     );
 
-    res.status(201).json({ id: result.insertId, room_number, room_type, base_price, extended_price, price_per_extra_hour: extraHourPrice, status, cleaning_time_minutes });
+    res.status(201).json({ id: result.insertId, room_number, room_type, base_price, extended_price, price_per_extra_hour: extraHourPrice, status, cleaning_time_minutes: 10 });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -48,7 +55,7 @@ export const createRoom = async (req, res) => {
 export const updateRoom = async (req, res) => {
   try {
     const { id } = req.params;
-    const { room_number, room_type, base_price, extended_price = 0, price_per_extra_hour, status, cleaning_time_minutes } = req.body;
+    const { room_number, room_type, base_price, extended_price = 0, price_per_extra_hour, status } = req.body;
     let extraHourPrice = Number(price_per_extra_hour || 0);
 
     if (req.user.role !== 'admin') {
@@ -59,9 +66,9 @@ export const updateRoom = async (req, res) => {
 
     await pool.execute(
       `UPDATE rooms
-      SET room_number = ?, room_type = ?, base_price = ?, extended_price = ?, price_per_extra_hour = ?, status = ?, cleaning_time_minutes = ?
+        SET room_number = ?, room_type = ?, base_price = ?, extended_price = ?, price_per_extra_hour = ?, status = ?, cleaning_time_minutes = 10
        WHERE id = ?`,
-          [room_number, room_type, base_price, extended_price, extraHourPrice, status, cleaning_time_minutes, id]
+          [room_number, room_type, base_price, extended_price, extraHourPrice, status, id]
     );
 
     res.json({ message: 'Habitación actualizada' });

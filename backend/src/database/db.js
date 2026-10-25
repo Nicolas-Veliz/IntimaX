@@ -57,7 +57,116 @@ const ensureSessionSchema = async () => {
   await ensureActivityLogUserForeignKey();
   await ensureColumn('rooms', 'extended_price', 'DECIMAL(10, 2) NOT NULL DEFAULT 0');
   await ensureColumn('rooms', 'price_per_extra_hour', 'DECIMAL(10, 2) NOT NULL DEFAULT 0');
-  await ensureColumn('rooms', 'cleaning_time_minutes', 'INT NOT NULL DEFAULT 20');
+  await ensureColumn('rooms', 'cleaning_time_minutes', 'INT NOT NULL DEFAULT 10');
+  await ensureColumn('shifts', 'cleaned_at', 'DATETIME NULL');
+  await ensureCleaningSchema();
+  await ensureAmenityCategorySchema();
+};
+
+const ensureAmenityCategorySchema = async () => {
+  const allowedCategories = [
+    'bebidas',
+    'desayuno',
+    'drugstore',
+    'comidas',
+    'postres',
+    'bebidas_con_alcohol'
+  ];
+  const [columns] = await pool.execute(
+    `SELECT column_type AS column_type, is_nullable AS is_nullable,
+            column_default AS column_default
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'amenities' AND column_name = 'category'`,
+    [process.env.DB_NAME]
+  );
+  const categoryColumn = columns[0];
+
+  if (!categoryColumn) {
+    throw new Error('No se encontró amenities.category');
+  }
+
+  const existingCategories = [...categoryColumn.column_type.matchAll(/'((?:[^']|'')*)'/g)]
+    .map(([, value]) => value.replace(/''/g, "'"));
+
+  if (
+    categoryColumn.column_default === 'comidas' &&
+    existingCategories.length === allowedCategories.length &&
+    allowedCategories.every((category) => existingCategories.includes(category))
+  ) {
+    return;
+  }
+
+  const transitionalCategories = [...new Set([...existingCategories, ...allowedCategories])];
+  const nullable = categoryColumn.is_nullable === 'YES' ? 'NULL' : 'NOT NULL';
+
+  await pool.execute(
+    `ALTER TABLE amenities MODIFY COLUMN category ENUM(${transitionalCategories.map((value) => `'${value}'`).join(',')}) ${nullable} DEFAULT 'comidas'`
+  );
+
+  await pool.execute(`
+    UPDATE amenities
+    SET category = CASE
+      WHEN category IN ('higiene', 'entretenimiento', 'otros') THEN 'drugstore'
+      WHEN category = 'bebidas'
+        AND (LOWER(name) LIKE '%cerveza%' OR LOWER(name) LIKE '%vino%' OR LOWER(name) LIKE '%alcohol%')
+        THEN 'bebidas_con_alcohol'
+      ELSE category
+    END
+    WHERE category IN ('higiene', 'entretenimiento', 'otros')
+       OR (category = 'bebidas'
+           AND (LOWER(name) LIKE '%cerveza%' OR LOWER(name) LIKE '%vino%' OR LOWER(name) LIKE '%alcohol%'))
+  `);
+
+  await pool.execute(
+    `ALTER TABLE amenities MODIFY COLUMN category ENUM(${allowedCategories.map((value) => `'${value}'`).join(',')}) ${nullable} DEFAULT 'comidas'`
+  );
+};
+
+const ensureCleaningSchema = async () => {
+  const [roleColumns] = await pool.execute(
+    `SELECT column_type AS column_type, is_nullable AS is_nullable,
+            column_default AS column_default
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'users' AND column_name = 'role'`,
+    [process.env.DB_NAME]
+  );
+  const roleColumn = roleColumns[0];
+
+  if (!roleColumn) {
+    throw new Error('No se encontró users.role');
+  }
+
+  const roleValues = [...roleColumn.column_type.matchAll(/'((?:[^']|'')*)'/g)]
+    .map(([, value]) => value.replace(/''/g, "'"));
+
+  if (!roleValues.includes('cleaning')) {
+    roleValues.push('cleaning');
+    const enumValues = roleValues
+      .map((value) => `'${value.replace(/'/g, "''")}'`)
+      .join(',');
+    const nullable = roleColumn.is_nullable === 'YES' ? 'NULL' : 'NOT NULL';
+    const defaultValue = roleColumn.column_default === null
+      ? ''
+      : ` DEFAULT '${String(roleColumn.column_default).replace(/'/g, "''")}'`;
+
+    await pool.execute(
+      `ALTER TABLE users MODIFY COLUMN role ENUM(${enumValues}) ${nullable}${defaultValue}`
+    );
+  }
+
+  await pool.execute('UPDATE rooms SET cleaning_time_minutes = 10 WHERE cleaning_time_minutes <> 10 OR cleaning_time_minutes IS NULL');
+  await pool.execute('ALTER TABLE rooms MODIFY COLUMN cleaning_time_minutes INT NOT NULL DEFAULT 10');
+  await pool.execute(`
+    UPDATE shifts
+    SET cleaning_start = COALESCE(cleaning_start, NOW()),
+        cleaning_end = DATE_ADD(COALESCE(cleaning_start, NOW()), INTERVAL 10 MINUTE)
+    WHERE status = 'cleaning'
+      AND (
+        cleaning_start IS NULL OR
+        cleaning_end IS NULL OR
+        cleaning_end <> DATE_ADD(cleaning_start, INTERVAL 10 MINUTE)
+      )
+  `);
 };
 
 const ensureActivityLogUserForeignKey = async () => {

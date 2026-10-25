@@ -18,11 +18,14 @@ export const getRooms = () => API.get('/rooms').then(res => res.data);
 export const createRoom = (roomData) => API.post('/rooms', roomData).then(res => res.data);
 export const updateRoom = (id, roomData) => API.put(`/rooms/${id}`, roomData).then(res => res.data);
 export const deleteRoom = (id) => API.delete(`/rooms/${id}`).then(res => res.data);
+export const getShiftConsumption = (shift_id) => API.get(`/amenities/consumption/${shift_id}`).then(res => res.data);
+export const assignCleaner = (shift_id, cleaner_id) => API.put(`/shifts/${shift_id}/cleaner`, { cleaner_id }).then(res => res.data);
 
 // Servicios de turnos
 export const createShift = (room_id, duration_hours) => API.post('/shifts', { room_id, duration_hours }).then(res => res.data);
 export const registerPayment = (shift_id, payment_method) => API.put(`/shifts/${shift_id}/payment`, { payment_method }).then(res => res.data);
-export const markCleaned = (room_id) => API.put(`/shifts/clean/${room_id}`, { cleaned_by: 1 }).then(res => res.data);
+export const markCleaned = (room_id) => API.put(`/shifts/clean/${room_id}`).then(res => res.data);
+export const getCleaningReport = (params = {}) => API.get('/shifts/cleaning-report', { params }).then(res => res.data);
 export const extendShift = (shift_id, extra_hours) => API.put(`/shifts/${shift_id}/extend`, { extra_hours }).then(res => res.data);
 export const confirmNoShow = (shift_id) => API.put(`/shifts/${shift_id}/no-show`).then(res => res.data);
 
@@ -34,6 +37,7 @@ export const getRoomUsage = () => API.get('/metrics/room-usage').then(res => res
 
 //final del archivo
 export const getUsers = () => API.get('/users').then(res => res.data);
+export const getCleaningStaff = () => API.get('/users/cleaning-staff').then(res => res.data);
 export const createUser = (userData) => API.post('/users', userData).then(res => res.data);
 export const updateUser = (id, userData) => API.put(`/users/${id}`, userData).then(res => res.data);
 export const deleteUser = (id) => API.delete(`/users/${id}`).then(res => res.data);

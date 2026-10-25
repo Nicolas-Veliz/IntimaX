@@ -73,7 +73,9 @@ function UsersPanel() {
 
       receptionist: t.users.receptionist,
 
-      user: t.users.userRole
+      user: t.users.userRole,
+
+      cleaning: t.users.cleaning
 
     };
 
@@ -594,6 +596,12 @@ function UsersPanel() {
                     <option value="admin">
 
                       {t.users.admin}
+
+                    </option>
+
+                    <option value="cleaning">
+
+                      {t.users.cleaning}
 
                     </option>
 

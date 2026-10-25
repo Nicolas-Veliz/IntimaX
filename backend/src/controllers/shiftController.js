@@ -9,7 +9,20 @@ const generateShiftCode = () => {
 
 // Calcular precio basado en duración y tipo de habitación
 const calculatePrice = (room, hours) => {
-  return hours === 2 ? room.base_price : room.extended_price;
+  const basePrice = Number(room.base_price || 0);
+
+  if (hours === 2) {
+    return basePrice;
+  }
+
+  const configuredExtendedPrice = Number(room.extended_price || 0);
+
+  if (configuredExtendedPrice > 0) {
+    return configuredExtendedPrice;
+  }
+
+  const extraHours = Math.ceil(Math.max(0, Number(hours) - 2));
+  return basePrice + extraHours * Number(room.price_per_extra_hour || 0);
 };
 
 export const createShift = async (req, res) => {
@@ -163,38 +176,110 @@ export const registerPayment = async (req, res) => {
     const { id } = req.params;
     const { payment_method } = req.body;
     
-    await pool.execute(
-      'UPDATE shifts SET payment_method = ?, status = "completed", actual_end_time = NOW() WHERE id = ?',
+    const [updatedShift] = await pool.execute(
+      'UPDATE shifts SET payment_method = ?, status = "completed", actual_end_time = NOW() WHERE id = ? AND status = "active"',
       [payment_method, id]
     );
+
+    if (updatedShift.affectedRows === 0) {
+      return res.status(404).json({ message: 'Turno activo no encontrado' });
+    }
     
     // Marcar habitación para limpieza
     const [shift] = await pool.execute(
-      'SELECT room_id FROM shifts WHERE id = ?',
+      `SELECT s.room_id, s.price, s.payment_method, r.room_number, r.room_type
+       FROM shifts s
+       JOIN rooms r ON r.id = s.room_id
+       WHERE s.id = ?`,
       [id]
     );
     
+    let cleaningEnd = null;
+
     if (shift.length > 0) {
-      const cleaningEnd = new Date();
-      cleaningEnd.setMinutes(cleaningEnd.getMinutes() + 20); // 20 min de limpieza
-      
       await pool.execute(
-        `UPDATE shifts SET status = 'cleaning', cleaning_start = NOW(), cleaning_end = ? 
+        `UPDATE shifts
+         SET status = 'cleaning', cleaned_by = NULL, cleaning_start = NOW(),
+             cleaning_end = DATE_ADD(NOW(), INTERVAL 10 MINUTE)
          WHERE id = ?`,
-        [cleaningEnd, id]
+        [id]
       );
+
+      const [cleaningWindow] = await pool.execute(
+        'SELECT cleaning_end FROM shifts WHERE id = ?',
+        [id]
+      );
+      cleaningEnd = cleaningWindow[0].cleaning_end;
       
       await pool.execute(
         'UPDATE rooms SET status = "cleaning" WHERE id = ?',
         [shift[0].room_id]
       );
       
-      io.to('reception').emit('room_needs_cleaning', { room_id: shift[0].room_id });
+      io.to('reception').emit('room_needs_cleaning', {
+        room_id: shift[0].room_id,
+        shift_id: id,
+        room_number: shift[0].room_number,
+        cleaning_end: cleaningEnd
+      });
     }
-    
-    res.json({ message: 'Payment registered successfully' });
+
+    res.json({ message: 'Payment registered successfully', shift: { ...shift[0], cleaning_end: cleaningEnd } });
   } catch (error) {
     console.error('Error registering payment:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const assignCleaner = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cleanerId = Number(req.body.cleaner_id);
+
+    if (!Number.isInteger(cleanerId) || cleanerId <= 0) {
+      return res.status(400).json({ message: 'Seleccione una empleada de limpieza válida' });
+    }
+
+    const [cleaners] = await pool.execute(
+      'SELECT id FROM users WHERE id = ? AND role = ? AND is_active = TRUE',
+      [cleanerId, 'cleaning']
+    );
+
+    if (cleaners.length === 0) {
+      return res.status(404).json({ message: 'Empleada de limpieza no encontrada' });
+    }
+
+    const [shifts] = await pool.execute(
+      'SELECT room_id, cleaned_by FROM shifts WHERE id = ? AND status = ?',
+      [id, 'cleaning']
+    );
+
+    if (shifts.length === 0) {
+      return res.status(409).json({ message: 'El turno ya no está en limpieza' });
+    }
+
+    if (shifts[0].cleaned_by) {
+      return res.status(409).json({ message: 'La habitación ya tiene una empleada asignada' });
+    }
+
+    const [result] = await pool.execute(
+      'UPDATE shifts SET cleaned_by = ? WHERE id = ? AND status = ? AND cleaned_by IS NULL',
+      [cleanerId, id, 'cleaning']
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(409).json({ message: 'La habitación ya tiene una empleada asignada' });
+    }
+
+    io.to('reception').emit('cleaner_assigned', {
+      room_id: shifts[0].room_id,
+      shift_id: id,
+      cleaner_id: cleanerId
+    });
+
+    res.json({ message: 'Habitación asignada correctamente', cleaner_id: cleanerId });
+  } catch (error) {
+    console.error('Error assigning cleaner:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -202,13 +287,30 @@ export const registerPayment = async (req, res) => {
 export const markCleaned = async (req, res) => {
   try {
     const { room_id } = req.params;
-    const { cleaned_by } = req.body;
+
+    const [shifts] = await pool.execute(
+      `SELECT id, cleaned_by, cleaning_end <= NOW() AS cleaning_elapsed
+       FROM shifts WHERE room_id = ? AND status = ? ORDER BY id DESC LIMIT 1`,
+      [room_id, 'cleaning']
+    );
+
+    if (shifts.length === 0) {
+      return res.status(404).json({ message: 'No hay un turno en limpieza para esta habitación' });
+    }
+
+    if (!shifts[0].cleaned_by) {
+      return res.status(409).json({ message: 'Asigne una empleada antes de finalizar la limpieza' });
+    }
+
+    if (Number(shifts[0].cleaning_elapsed) !== 1) {
+      return res.status(409).json({ message: 'La limpieza estará lista al completar los 10 minutos' });
+    }
     
     await pool.execute(
       `UPDATE shifts 
-       SET cleaned_by = ?, status = 'completed' 
-       WHERE room_id = ? AND status = 'cleaning'`,
-      [cleaned_by, room_id]
+        SET status = 'completed', cleaned_at = NOW()
+       WHERE id = ?`,
+      [shifts[0].id]
     );
     
     await pool.execute(
@@ -224,6 +326,44 @@ export const markCleaned = async (req, res) => {
     res.json({ message: 'Room cleaned and ready' });
   } catch (error) {
     console.error('Error marking cleaned:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getCleaningReport = async (req, res) => {
+  try {
+    const { start_date, end_date } = req.query;
+    let query = `
+      SELECT
+        s.id AS shift_id,
+        r.room_number,
+        COALESCE(NULLIF(TRIM(CONCAT_WS(' ', u.first_name, u.last_name)), ''), 'Personal eliminado') AS cleaner_name,
+        s.cleaning_start,
+        s.cleaned_at,
+        TIMESTAMPDIFF(SECOND, s.cleaning_start, s.cleaned_at) AS cleaning_duration_seconds
+      FROM shifts s
+      JOIN rooms r ON r.id = s.room_id
+      LEFT JOIN users u ON u.id = s.cleaned_by
+      WHERE s.cleaned_by IS NOT NULL AND s.cleaned_at IS NOT NULL
+    `;
+    const params = [];
+
+    if (start_date) {
+      query += ' AND DATE(s.cleaned_at) >= ?';
+      params.push(start_date);
+    }
+
+    if (end_date) {
+      query += ' AND DATE(s.cleaned_at) <= ?';
+      params.push(end_date);
+    }
+
+    query += ' ORDER BY s.cleaned_at DESC';
+
+    const [report] = await pool.execute(query, params);
+    res.json(report);
+  } catch (error) {
+    console.error('Error loading cleaning report:', error);
     res.status(500).json({ message: error.message });
   }
 };

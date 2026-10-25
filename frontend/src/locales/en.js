@@ -99,8 +99,22 @@ const en = {
     roomAvailable: 'Room available',
     roomOccupied: 'Room occupied',
     roomCleaning: 'Room being cleaned',
+    assignCleaner: 'Assign cleaner',
+    selectCleaner: 'Select cleaner',
+    assignedCleaner: 'Assigned to',
+    noCleaningStaff: 'No active users with the cleaning role.',
+    cleaningTimeRemaining: 'Cleaning time remaining',
+    cleaningTimeComplete: 'Cleaning complete',
+    cleaningNotAssigned: 'Assign a cleaning staff member before continuing.',
+    cleaningWait: 'The room will be available after the 10-minute cleaning period.',
 
-    noRooms: 'No rooms registered.'
+    noRooms: 'No rooms registered.',
+    shiftTicket: 'Shift closing ticket',
+    roomCharge: 'Room / shift',
+    date: 'Date',
+    printTicket: 'Print ticket',
+    closeTicket: 'Close',
+    ticketItemsError: 'Could not load the shift product details.'
   },
 
   roomTile: {
@@ -157,6 +171,7 @@ const en = {
     receptionist: 'Receptionist',
     supervisor: 'Supervisor',
     admin: 'Administrator',
+    cleaning: 'Cleaning staff',
     userRole: 'User',
 
     save: 'SAVE',
@@ -322,6 +337,27 @@ const en = {
     staffHistory:
       'Staff history',
 
+    cleaningReport:
+      'Cleaning report',
+
+    cleaningEmployee:
+      'Employee',
+
+    cleaningRoom:
+      'Room',
+
+    cleaningStartedAt:
+      'Cleaning started',
+
+    cleaningFinishedAt:
+      'Room ready',
+
+    cleaningDuration:
+      'Cleaning time',
+
+    noCleaningRecords:
+      'No completed cleaning records.',
+
     person:
       'Person',
 
@@ -437,17 +473,20 @@ const en = {
     drinks:
       'Drinks',
 
+    breakfast:
+      'Breakfast',
+
+    drugstore:
+      'Drugstore',
+
     food:
       'Food',
 
-    hygiene:
-      'Hygiene',
+    desserts:
+      'Desserts',
 
-    entertainment:
-      'Entertainment',
-
-    others:
-      'Others',
+    alcoholicDrinks:
+      'Alcoholic drinks',
 
     room:
       'Room',

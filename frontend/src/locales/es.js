@@ -94,8 +94,22 @@ const es = {
     roomAvailable: 'Habitación disponible',
     roomOccupied: 'Habitación ocupada',
     roomCleaning: 'Habitación en limpieza',
+    assignCleaner: 'Asignar empleada',
+    selectCleaner: 'Seleccionar empleada',
+    assignedCleaner: 'Responsable',
+    noCleaningStaff: 'No hay empleadas activas con rol de limpieza.',
+    cleaningTimeRemaining: 'Tiempo de limpieza restante',
+    cleaningTimeComplete: 'Limpieza finalizada',
+    cleaningNotAssigned: 'Asigne una empleada de limpieza antes de continuar.',
+    cleaningWait: 'La habitación estará disponible al completar los 10 minutos.',
 
-    noRooms: 'No hay habitaciones registradas.'
+    noRooms: 'No hay habitaciones registradas.',
+    shiftTicket: 'Ticket de cierre de turno',
+    roomCharge: 'Habitación / turno',
+    date: 'Fecha',
+    printTicket: 'Imprimir ticket',
+    closeTicket: 'Cerrar',
+    ticketItemsError: 'No se pudo cargar el detalle de los productos del turno.'
 
   },
 
@@ -152,6 +166,7 @@ const es = {
     receptionist: 'Recepcionista',
     supervisor: 'Supervisor',
     admin: 'Administrador',
+    cleaning: 'Personal de limpieza',
     userRole: 'Usuario',
 
     save: 'GUARDAR',
@@ -243,6 +258,13 @@ const es = {
     noSessions: 'No hay sesiones registradas.',
 
     staffHistory: 'Historial de personal',
+    cleaningReport: 'Reporte de limpieza',
+    cleaningEmployee: 'Empleada',
+    cleaningRoom: 'Habitación',
+    cleaningStartedAt: 'Inicio de limpieza',
+    cleaningFinishedAt: 'Habitación lista',
+    cleaningDuration: 'Tiempo de limpieza',
+    noCleaningRecords: 'No hay limpiezas finalizadas registradas.',
     person: 'Persona',
     action: 'Acción',
     duration: 'Duración',
@@ -312,10 +334,11 @@ const es = {
     price: 'Precio',
 
     drinks: 'Bebidas',
+    breakfast: 'Desayuno',
+    drugstore: 'Drugstore',
     food: 'Comidas',
-    hygiene: 'Higiene',
-    entertainment: 'Entretenimiento',
-    others: 'Otros',
+    desserts: 'Postres',
+    alcoholicDrinks: 'Bebidas con alcohol',
 
     room: 'Hab.',
 

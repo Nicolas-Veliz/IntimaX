@@ -2,7 +2,7 @@ import pool from '../database/db.js';
 import bcrypt from 'bcryptjs';
 
 const normalizeRole = (role) => {
-  if (role === 'admin' || role === 'supervisor' || role === 'receptionist') {
+  if (role === 'admin' || role === 'supervisor' || role === 'receptionist' || role === 'cleaning') {
     return role;
   }
   return 'receptionist';
@@ -19,6 +19,21 @@ export const getUsers = async (req, res) => {
        ORDER BY created_at DESC`
     );
     res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getCleaningStaff = async (req, res) => {
+  try {
+    const [staff] = await pool.execute(
+      `SELECT id, first_name, last_name
+       FROM users
+       WHERE role = 'cleaning' AND is_active = TRUE
+       ORDER BY first_name, last_name`
+    );
+
+    res.json(staff);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -154,7 +169,7 @@ export const getActivityReport = async (req, res) => {
         TIME(al.timestamp) as time
       FROM activity_logs al
       LEFT JOIN users u ON al.user_id = u.id
-      WHERE (u.id IS NULL OR u.role IN ('admin', 'user', 'receptionist', 'supervisor'))
+      WHERE (u.id IS NULL OR u.role IN ('admin', 'user', 'receptionist', 'supervisor', 'cleaning'))
     `;
     const params = [];
     
@@ -187,7 +202,7 @@ export const getActivityReport = async (req, res) => {
         MAX(al.timestamp) as last_activity
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
-      WHERE u.role IN ('admin', 'user', 'receptionist', 'supervisor')
+      WHERE u.role IN ('admin', 'user', 'receptionist', 'supervisor', 'cleaning')
       GROUP BY u.id
     `);
     
