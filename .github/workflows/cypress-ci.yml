@@ -1,0 +1,46 @@
+name: CI/CD Cypress Tests - IntimaX
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout del código
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 3. Instalar dependencias (Raíz, Backend y Frontend)
+        run: |
+          npm install
+          npm --prefix backend install
+          npm --prefix frontend install
+
+      - name: 4. Crear archivo cypress.env.json dinámicamente para CI
+        run: |
+          echo '{
+            "username": "${{ secrets.CYPRESS_USERNAME }}",
+            "password": "${{ secrets.CYPRESS_PASSWORD }}"
+          }' > cypress.env.json
+
+      - name: 5. Ejecutar Pruebas E2E con Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          # Levantamos el backend y el frontend en segundo plano de forma simultánea
+          start: |
+            npm --prefix backend run dev &
+            npm --prefix frontend run dev
+          # Cypress esperará a que el frontend responda en el puerto 5173 antes de correr los tests
+          wait-on: 'http://localhost:5173'
+          wait-on-timeout: 120
+          browser: electron
+          headless: true
