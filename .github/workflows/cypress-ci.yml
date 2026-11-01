@@ -1,45 +1,132 @@
+
 name: CI/CD Cypress Tests - IntimaX
 
 on:
   push:
-    branches: [ "main", "master", "develop" ]
+    branches: ["main", "master", "develop"]
   pull_request:
-    branches: [ "main", "master", "develop" ]
+    branches: ["main", "master", "develop"]
 
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: intimax_ci_root_password
+          MYSQL_DATABASE: hotel_management
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -p$MYSQL_ROOT_PASSWORD"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
     steps:
-      - name: 1. Checkout del código
+      - name: Checkout del codigo
         uses: actions/checkout@v4
 
-      - name: 2. Configurar Node.js (Versión 22)
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
-      - name: 3. Instalar dependencias (Raíz, Backend y Frontend)
+      - name: Instalar dependencias
         run: |
           npm install
           npm --prefix backend install
           npm --prefix frontend install
 
-      - name: 4. Crear archivo cypress.env.json dinámicamente para CI
+      - name: Importar estructura de la base de datos
+        env:
+          MYSQL_ROOT_PASSWORD: intimax_ci_root_password
         run: |
-          echo '{
-            "username": "${{ secrets.CYPRESS_USERNAME }}",
-            "password": "${{ secrets.CYPRESS_PASSWORD }}"
-          }' > cypress.env.json
+          python -c "from pathlib import Path; p=Path('backend/database/hotel_management_ci.sql'); p.write_text(p.read_text(encoding='utf-8-sig'), encoding='utf-8')"
+          mysql -h 127.0.0.1 -P 3306 -uroot -p"$MYSQL_ROOT_PASSWORD" < backend/database/hotel_management_ci.sql
 
-      - name: 5. Ejecutar Backend en segundo plano de forma persistente
+      - name: Crear usuario administrador para Cypress
+        env:
+          DB_PASSWORD: intimax_ci_root_password
+          CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+        run: |
+          node --input-type=module <<'NODE'
+          import mysql from 'mysql2/promise';
+          import bcrypt from 'bcryptjs';
+
+          const username = process.env.CYPRESS_USERNAME;
+          const password = process.env.CYPRESS_PASSWORD;
+
+          if (!username || !password) {
+            throw new Error('Faltan los secretos CYPRESS_USERNAME o CYPRESS_PASSWORD.');
+          }
+
+          const connection = await mysql.createConnection({
+            host: '127.0.0.1',
+            user: 'root',
+            password: process.env.DB_PASSWORD,
+            database: 'hotel_management'
+          });
+
+          try {
+            const hash = await bcrypt.hash(password, 10);
+
+            await connection.execute(
+              `INSERT INTO users
+              (username, password, full_name, first_name, last_name, role, is_active)
+              VALUES (?, ?, ?, ?, ?, 'admin', 1)`,
+              [username, hash, 'Cypress Testing', 'Cypress', 'Testing']
+            );
+
+            console.log('Usuario administrador de pruebas creado.');
+          } finally {
+            await connection.end();
+          }
+          NODE
+
+      - name: Crear archivo de entorno para Cypress
+        env:
+          CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+        run: |
+          node -e "require('fs').writeFileSync('cypress.env.json', JSON.stringify({username: process.env.CYPRESS_USERNAME, password: process.env.CYPRESS_PASSWORD}))"
+
+      - name: Iniciar backend
+        env:
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASSWORD: intimax_ci_root_password
+          DB_NAME: hotel_management
+          JWT_SECRET: intimax_ci_test_secret_only
+          NODE_ENV: development
+          DISABLE_LOGIN_RATE_LIMIT: "true"
+          ALLOWED_ORIGINS: http://localhost:5173
         run: |
           nohup npm --prefix backend run dev > backend.log 2>&1 &
 
-      - name: 6. Ejecutar Pruebas E2E con Cypress (Levantando Frontend)
+      - name: Esperar disponibilidad del backend
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3000/api/health; then
+              echo "Backend disponible."
+              exit 0
+            fi
+
+            echo "Esperando al backend..."
+            sleep 2
+          done
+
+          echo "Error: el backend no respondio a tiempo."
+          cat backend.log
+          exit 1
+
+      - name: Ejecutar pruebas E2E con Cypress
         uses: cypress-io/github-action@v6
         with:
-          start: npm --prefix frontend run dev
-          wait-on: 'http://localhost:5173'
+          start: npm --prefix frontend run dev -- --host 0.0.0.0
+          wait-on: http://localhost:5173
           wait-on-timeout: 180
           browser: electron
