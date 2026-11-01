@@ -123,12 +123,28 @@ jobs:
           cat backend.log
           exit 1
 
+      - name: Iniciar frontend
+        run: |
+          nohup npm --prefix frontend run dev -- --host 0.0.0.0 > frontend.log 2>&1 &
+          echo $! > frontend.pid
+
+      - name: Esperar disponibilidad del frontend
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:5173/ > /dev/null; then
+              echo "Frontend disponible."
+              exit 0
+            fi
+
+            echo "Esperando al frontend..."
+            sleep 2
+          done
+
+          echo "Error: el frontend no respondio."
+          cat frontend.log
+          exit 1
+
       - name: Ejecutar pruebas E2E con Cypress
         uses: cypress-io/github-action@v6
         with:
-          start: npm --prefix frontend run dev -- --host 127.0.0.1
-          wait-on: 'http://127.0.0.1:5173'
-          wait-on-timeout: 180
           browser: electron
-        env:
-          DEBUG: '@cypress/github-action:'
