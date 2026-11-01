@@ -14,10 +14,10 @@ jobs:
       - name: 1. Checkout del código
         uses: actions/checkout@v4
 
-      - name: 2. Configurar Node.js
+      - name: 2. Configurar Node.js (Versión 22 compatible con Cypress 16)
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: 3. Instalar dependencias (Raíz, Backend y Frontend)
         run: |
@@ -32,13 +32,11 @@ jobs:
             "password": "${{ secrets.CYPRESS_PASSWORD }}"
           }' > cypress.env.json
 
-      - name: 5. Levantar Backend en segundo plano
-        run: npm --prefix backend run dev &
-
-      - name: 6. Levantar Frontend en segundo plano y ejecutar Cypress
+      - name: 5. Ejecutar Pruebas E2E con Cypress y Servidores Simultáneos
         uses: cypress-io/github-action@v6
         with:
-          start: npm --prefix frontend run dev
+          # Usamos un comando nativo que levanta ambos servicios concurrentemente
+          start: "npm --prefix backend run dev & npm --prefix frontend run dev"
           wait-on: 'http://localhost:5173'
           wait-on-timeout: 180
           browser: electron
