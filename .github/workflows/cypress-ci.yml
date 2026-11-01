@@ -92,7 +92,12 @@ jobs:
           CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
         run: |
-          node -e "require('fs').writeFileSync('cypress.env.json', JSON.stringify({username: process.env.CYPRESS_USERNAME, password: process.env.CYPRESS_PASSWORD}))"
+          node -e "require('fs').writeFileSync('cypress.env.json', JSON.stringify({
+            username: process.env.CYPRESS_USERNAME,
+            password: process.env.CYPRESS_PASSWORD,
+            testUserPassword: 'Password123!',
+            testUserNewPassword: 'Password456!'
+          }, null, 2))"
 
       - name: Iniciar backend
         env:
