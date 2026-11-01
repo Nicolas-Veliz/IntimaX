@@ -32,14 +32,13 @@ jobs:
             "password": "${{ secrets.CYPRESS_PASSWORD }}"
           }' > cypress.env.json
 
-      - name: 5. Ejecutar Pruebas E2E con Cypress
+      - name: 5. Levantar Backend en segundo plano
+        run: npm --prefix backend run dev &
+
+      - name: 6. Levantar Frontend en segundo plano y ejecutar Cypress
         uses: cypress-io/github-action@v6
         with:
-          # Usamos un script combinado o levantamos backend y frontend 
-          # asegurando que queden activos concurrentemente para el action de cypress
-          start: |
-            npm --prefix backend run dev &
-            npm --prefix frontend run dev &
+          start: npm --prefix frontend run dev
           wait-on: 'http://localhost:5173'
           wait-on-timeout: 180
           browser: electron
