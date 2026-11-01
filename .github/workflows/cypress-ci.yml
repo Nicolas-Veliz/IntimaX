@@ -130,3 +130,5 @@ jobs:
           wait-on: 'http://127.0.0.1:5173'
           wait-on-timeout: 180
           browser: electron
+        env:
+          DEBUG: '@cypress/github-action:'
