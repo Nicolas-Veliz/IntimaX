@@ -55,9 +55,17 @@ describe('CP-03 - Creación de usuario', () => {
       cy.get('button[type="submit"]').click();
     });
 
-    cy.wait('@createUser')
-      .its('response.statusCode')
-      .should('eq', 201);
+    cy.wait('@createUser').then(({ request, response }) => {
+  console.log('DATOS ENVIADOS:', request.body);
+  console.log('RESPUESTA DEL BACKEND:', response?.body);
+
+  cy.log('Error del backend: ' + response?.body?.message);
+
+  expect(
+    response?.statusCode,
+    'Error: ' + response?.body?.message
+  ).to.eq(201);
+});
 
     // Verificar que el usuario haya sido creado
     cy.get('.users-custom-table')
