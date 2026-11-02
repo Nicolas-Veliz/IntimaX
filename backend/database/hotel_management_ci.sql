@@ -284,7 +284,7 @@ CREATE TABLE `users` (
   `dni` varchar(20) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `address` text,
-  `shift` enum('maÃ±ana','tarde','noche') DEFAULT 'maÃ±ana',
+  `shift` enum('mañana','tarde','noche') DEFAULT 'mañana',
   `avatar_color` varchar(7) DEFAULT '#e94560',
   `last_logout` datetime DEFAULT NULL,
   `session_duration` int DEFAULT '0',
